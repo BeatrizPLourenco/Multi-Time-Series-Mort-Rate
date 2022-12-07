@@ -19,18 +19,18 @@ class TimeSeriesTransformer(nn.Module):
     def __init__(self, 
         input_size: int,
         dec_seq_len: int,
-        batch_first: bool=True,
-        out_seq_len: int=58,
-        dim_val: int=512,  
-        n_encoder_layers: int=4,
-        n_decoder_layers: int=4,
-        n_heads: int=8,
-        dropout_encoder: float=0.2, 
-        dropout_decoder: float=0.2,
-        dropout_pos_enc: float=0.1,
-        dim_feedforward_encoder: int=2048,
-        dim_feedforward_decoder: int=2048,
-        num_predicted_features: int=1
+        batch_first: bool = True,
+        out_seq_len: int = 58,
+        dim_val: int = 512,  
+        n_encoder_layers: int = 4,
+        n_decoder_layers: int = 4,
+        n_heads: int = 8,
+        dropout_encoder: float = 0.2, 
+        dropout_decoder: float = 0.2,
+        dropout_pos_enc: float = 0.1,
+        dim_feedforward_encoder: int = 2048,
+        dim_feedforward_decoder: int = 2048,
+        num_predicted_features: int = 1
         ): 
 
 
@@ -127,23 +127,12 @@ class TimeSeriesTransformer(nn.Module):
         src = self.positional_encoding_layer(src) # src shape: [batch_size, src length, dim_val] regardless of number of input features
 
         # Pass through all the stacked encoder layers in the encoder
-        # Masking is only needed in the encoder if input sequences are padded
-        # which they are not in this time series use case, because all my
-        # input sequences are naturally of the same length. 
-        # (https://github.com/huggingface/transformers/issues/4083)
         src = self.encoder( # src shape: [batch_size, enc_seq_len, dim_val]
             src=src
             )
-        #print("From model.forward(): Size of src after encoder: {}".format(src.size()))
 
         # Pass decoder input through decoder input layer
         decoder_output = self.decoder_input_layer(tgt) # src shape: [target sequence length, batch_size, dim_val] regardless of number of input features
-        #print("From model.forward(): Size of decoder_output after linear decoder layer: {}".format(decoder_output.size()))
-
-        #if src_mask is not None:
-            #print("From model.forward(): Size of src_mask: {}".format(src_mask.size()))
-        #if tgt_mask is not None:
-            #print("From model.forward(): Size of tgt_mask: {}".format(tgt_mask.size()))
 
         # Pass throguh decoder - output shape: [batch_size, target seq len, dim_val]
         decoder_output = self.decoder(

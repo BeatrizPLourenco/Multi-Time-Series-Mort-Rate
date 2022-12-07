@@ -19,7 +19,9 @@ if __name__ == "__main__":
     split_value = 2000
     raw_filenamePT = 'Dataset/Mx_1x1_alt.txt'
     raw_filenameSW = 'Dataset/CHE_mort.xlsx'
-    T = 5
+    T = 10
+    T_encoder = 7
+    T_decoder = 3
     tau0 = 5
     
     # Preprocessing
@@ -30,10 +32,10 @@ if __name__ == "__main__":
     
     
     # preprocessing for the transformer
-    src, trg, trg_y = preprocessed_data(data, training_data,'Female', T, tau0, model = "transformer")
-    src = from_numpy(src).float() 
-    trg = from_numpy(trg).float()
-    trg_y = from_numpy(trg_y).float()
+    xe, xd, yd = preprocessed_data(data, training_data,'Female', (T_encoder, T_decoder), tau0, model = "transformer")
+    xe = from_numpy(xe).float() 
+    xd = from_numpy(xd).float()
+    yd = from_numpy(yd).float()
     
     ## Model parameters
     dim_val = 512 # This can be any value divisible by n_heads. 512 is used in the original transformer paper.
@@ -41,9 +43,9 @@ if __name__ == "__main__":
     n_decoder_layers = 4 # Number of times the decoder layer is stacked in the decoder
     n_encoder_layers = 4 # Number of times the encoder layer is stacked in the encoder
     input_size = 5 # The number of input variables. 1 if univariate forecasting.
-    dec_seq_len = 5 # length of input given to decoder. Can have any integer value.
-    enc_seq_len = 5 # length of input given to encoder. Can have any integer value.
-    output_sequence_length = 5 # Length of the target sequence, i.e. how many time steps should your forecast cover
+    dec_seq_len = T_decoder # length of input given to decoder. Can have any integer value.
+    enc_seq_len = T_encoder # length of input given to encoder. Can have any integer value.
+    output_sequence_length = 10 # Length of the target sequence, i.e. how many time steps should your forecast cover
     max_seq_len = enc_seq_len # What's the longest sequence the model will encounter? Used to make the positional encoder
     num_predicted_features = 5
     
@@ -57,71 +59,45 @@ if __name__ == "__main__":
         n_heads=n_heads,
         num_predicted_features=num_predicted_features)
     
-    # Make src mask for decoder with size:
+    # Make xe mask for decoder with size:
     tgt_mask = tst.generate_square_subsequent_mask(
-        dim1=output_sequence_length,
-        dim2=output_sequence_length
+        dim1 = dec_seq_len,
+        dim2 = dec_seq_len
        )
     
-    src_mask = tst.generate_square_subsequent_mask(
-        dim1=output_sequence_length,
+    xe_mask = tst.generate_square_subsequent_mask(
+        dim1=dec_seq_len,
         dim2=enc_seq_len
     )
     
     # Defining loss function and optimizer
     loss = nn.MSELoss()
-    opt = optim.SGD(model.parameters(), lr=0.01)
-    
-    
-    #model.train()
-    error = loss(model(
-    src = src, 
-    tgt = trg,
-    src_mask=src_mask,
-    tgt_mask=tgt_mask
-    ), trg)
-    print(f'The initial transformer error is at {error}.')
+    lr = 0.05
+    opt = optim.SGD(model.parameters(), lr=lr)
+    scheduler = optim.lr_scheduler.StepLR(opt, 1.0, gamma=0.95)
     
     #Losses
     all_losses = train(
         model = model, 
-        src = src,
-        trg = trg,
-        src_mask=src_mask,
-        tgt_mask=tgt_mask,
+        src = xe,
+        trg = xd,
+        src_mask = xe_mask,
+        tgt_mask = tgt_mask,
         num_epochs = 1, 
         optimizer = opt, 
         criterion = loss)
     
     # Mean Squared error
     output = model(
-    src = src, 
-    tgt = trg,
-    src_mask=src_mask,
+    src = xe, 
+    tgt = xd,
+    src_mask=xe_mask,
     tgt_mask=tgt_mask
     )
     
-    error = loss(output, trg)
+    error = loss(output, yd)
     print(f'The transformer error is at {error}.')
     
-    #train_loss_list = fit(model, opt, loss, batchify_data(src), 10)
-
-"""
-    train_model = train_model(model, epochs= 100, print_every=5)
-    
-    
-    
-    
-    """
-    
-    
-    
-    
-
-    
-    
-    #transformer_model = nn.Transformer(nhead=16, num_encoder_layers=12)
-    #out = transformer_model(src, from_numpy(trg).float())
 
     
     
