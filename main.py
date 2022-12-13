@@ -14,6 +14,7 @@ from torch import utils, from_numpy, nn, optim
 from train import train
 
 if __name__ == "__main__":
+    
     # Control
     country = "PT"
     split_value = 2000
