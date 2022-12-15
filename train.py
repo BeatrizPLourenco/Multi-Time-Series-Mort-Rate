@@ -10,7 +10,25 @@ import torch
 import numpy as np
 from tqdm import tqdm
 from random import shuffle, choice
+from torch import Tensor
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+def batchify(data: Tensor, bsz: int) -> Tensor:
+    """Divides the data into bsz separate sequences, removing extra elements
+    that wouldn't cleanly fit.
+
+    Args:
+        data: Tensor, shape [N]
+        bsz: int, batch size
+
+    Returns:
+        Tensor of shape [N // bsz, bsz]
+    """
+    seq_len = data.size(0) // bsz
+    data = data[:seq_len * bsz]
+    data = data.view(bsz, seq_len).t().contiguous()
+    return data.to(device)
 
 def train(model, src, trg,tgt_mask, src_mask, num_epochs, optimizer, criterion ):
     all_losses = []
