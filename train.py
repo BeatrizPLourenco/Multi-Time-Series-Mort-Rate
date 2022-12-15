@@ -24,6 +24,8 @@ def batchify(data: Tensor, bsz: int) -> Tensor:
 
     Returns:
         Tensor of shape [N // bsz, bsz]
+
+        
     """
     seq_len = data.size(0) // bsz
     data = data[:seq_len * bsz]
