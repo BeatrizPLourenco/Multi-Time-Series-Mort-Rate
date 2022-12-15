@@ -8,6 +8,8 @@ Created on Fri Oct 14 18:23:31 2022
 
 from data_cleaning import preprocess_country_data, split_data
 from preprocessing import preprocessing_with_both_genders, preprocessed_data
+from preprocessing_transformer import preprocessing_with_both_genders, preprocessed_data
+
 import TimeSeriesTransformer as tst
 from torch import utils, from_numpy, nn, optim
 #from torch_training import train_model
@@ -33,10 +35,9 @@ if __name__ == "__main__":
     
     
     # preprocessing for the transformer
-    xe, xd, yd = preprocessed_data(data, training_data,'Female', (T_encoder, T_decoder), tau0, model = "transformer")
+    xe, xd = preprocessed_data(data, training_data,'Female', (T_encoder, T_decoder), tau0, model = "transformer")
     xe = from_numpy(xe).float() 
     xd = from_numpy(xd).float()
-    yd = from_numpy(yd).float()
     
     ## Model parameters
     dim_val = 512 # This can be any value divisible by n_heads. 512 is used in the original transformer paper.
