@@ -58,8 +58,8 @@ def evaluate(model, eval_data, tgt_mask,  src_mask, criterion) -> float:
     model.eval()  # turn on evaluation mode
     total_loss = 0.
     with torch.no_grad():
-        for i in range(0, eval_data.size(0) - 1, bptt):
-            data, targets = get_batch(eval_data, i)
+        for batch_nb in range(0, eval_data[0].size(0) - 1):
+            data, targets = get_batch(eval_data, batch_nb)
             seq_len = data.size(0)
             if seq_len != bptt:
                 src_mask = src_mask[:seq_len, :seq_len]

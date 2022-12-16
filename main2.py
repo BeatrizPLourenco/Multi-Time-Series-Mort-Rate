@@ -42,7 +42,7 @@ if __name__ == "__main__":
     xe = from_numpy(xe).float() 
     xd = from_numpy(xd).float()
 
-    """
+
     xe_val, xd_val = preprocessed_data( validation_data,'Female', (T_encoder, T_decoder), tau0, model = "transformer")
     xe_val = from_numpy(xe_val).float() 
     xd_val = from_numpy(xd_val).float()
@@ -144,5 +144,4 @@ if __name__ == "__main__":
     print(f'The transformer error is at {error}.')
     
 
-    """
     
