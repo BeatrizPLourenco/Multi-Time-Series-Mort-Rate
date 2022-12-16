@@ -36,14 +36,12 @@ if __name__ == "__main__":
     
     training_data = data_to_logmat(training_data, 'Female')
     validation_data = data_to_logmat(validation_data, 'Female')
-
-    #data = reshape_logmat_agerange(data, tau0)
-
     
     # preprocessing for the transformer
     xe, xd = preprocessed_data(training_data,'Female', (T_encoder, T_decoder), tau0, model = "transformer")
     xe = from_numpy(xe).float() 
     xd = from_numpy(xd).float()
+
     """
     xe_val, xd_val = preprocessed_data( validation_data,'Female', (T_encoder, T_decoder), tau0, model = "transformer")
     xe_val = from_numpy(xe_val).float() 
