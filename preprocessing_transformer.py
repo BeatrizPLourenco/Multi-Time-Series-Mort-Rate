@@ -35,6 +35,19 @@ def get_batch(source: Tensor, i: int) -> Tuple[Tensor, Tensor]:
     target = source[i+1:i+1+seq_len].reshape(-1)
     return data, target
 
+def reshape_logmat_agerange(logmat, agerange):
+    a1 = logmat.shape[1]-(agerange - 1)
+    full_seq_len = logmat.shape[0]
+    
+    reshape_logmat = np.empty((1,logmat.shape[0],agerange)) #shaping
+    reshape_logmat[:] = np.NaN 
+
+    T0 = 0
+    for a0 in range(0,99, agerange): 
+        reshape_logmat[T0,:,:] = reshape_logmat.iloc[:, a0 : (a0 + agerange)].copy()  # copy years from t0 to t9 and ages from a0 to a0+5 into xt_train [100*t0+a0, :, :]
+        T0 = T0 + full_seq_len
+    return reshape_logmat
+
 
 def transformer_input_shaping(padd_train,T_encoder, T_decoder,tau0):
     t1 = padd_train.shape[0]-(T_encoder + T_decoder-1)-1
