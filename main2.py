@@ -8,7 +8,7 @@ Created on Fri Oct 14 18:23:31 2022
 
 from data_cleaning import preprocess_country_data, split_data
 from preprocessing import preprocessing_with_both_genders, preprocessed_data
-from preprocessing_transformer import preprocessing_with_both_genders, preprocessed_data
+from preprocessing_transformer import preprocessed_data, data_to_logmat, reshape_logmat_agerange
 
 import TimeSeriesTransformer as tst
 from torch import utils, from_numpy, nn, optim
@@ -33,12 +33,16 @@ if __name__ == "__main__":
     # Split Data
     training_data, validation_data  = split_data(data, split_value)
     
+    data = data_to_logmat(training_data, 'Female')
+    data = reshape_logmat_agerange(data, tau0)
+
     
     # preprocessing for the transformer
     xe, xd = preprocessed_data(data, training_data,'Female', (T_encoder, T_decoder), tau0, model = "transformer")
     xe = from_numpy(xe).float() 
     xd = from_numpy(xd).float()
-    
+
+    """
     ## Model parameters
     dim_val = 512 # This can be any value divisible by n_heads. 512 is used in the original transformer paper.
     n_heads = 8 # The number of attention heads (aka parallel attention layers). dim_val must be divisible by this number
@@ -109,5 +113,5 @@ if __name__ == "__main__":
     print(f'The transformer error is at {error}.')
     
 
-    
+    """
     

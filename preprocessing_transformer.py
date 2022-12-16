@@ -20,7 +20,7 @@ def batchify(data: Tensor, bsz: int) -> Tensor:
 
 
 bptt = 35
-def get_batch(source: Tensor, i: int) -> Tuple[Tensor, Tensor]:
+def get_batch(source: Tensor, i: int):
     """
     Args:
         source: Tensor, shape [full_seq_len, batch_size]
@@ -36,7 +36,6 @@ def get_batch(source: Tensor, i: int) -> Tuple[Tensor, Tensor]:
     return data, target
 
 def reshape_logmat_agerange(logmat, agerange):
-    a1 = logmat.shape[1]-(agerange - 1)
     full_seq_len = logmat.shape[0]
     
     reshape_logmat = np.empty((1,logmat.shape[0],agerange)) #shaping
