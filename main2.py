@@ -8,12 +8,13 @@ Created on Fri Oct 14 18:23:31 2022
 
 from data_cleaning import preprocess_country_data, split_data
 from preprocessing import preprocessing_with_both_genders, preprocessed_data
-from preprocessing_transformer import preprocessed_data, data_to_logmat, reshape_logmat_agerange
+from preprocessing_transformer import preprocessed_data, data_to_logmat
 
 import TimeSeriesTransformer as tst
 from torch import utils, from_numpy, nn, optim
 #from torch_training import train_model
-from train import train, batchify
+from train_transformer import train, evaluate
+import math, time, copy
 
 if __name__ == "__main__":
     
@@ -33,16 +34,22 @@ if __name__ == "__main__":
     # Split Data
     training_data, validation_data  = split_data(data, split_value)
     
-    data = data_to_logmat(training_data, 'Female')
-    data = reshape_logmat_agerange(data, tau0)
+    training_data = data_to_logmat(training_data, 'Female')
+    validation_data = data_to_logmat(validation_data, 'Female')
+
+    #data = reshape_logmat_agerange(data, tau0)
 
     
     # preprocessing for the transformer
-    xe, xd = preprocessed_data(data, training_data,'Female', (T_encoder, T_decoder), tau0, model = "transformer")
+    xe, xd = preprocessed_data(training_data,'Female', (T_encoder, T_decoder), tau0, model = "transformer")
     xe = from_numpy(xe).float() 
     xd = from_numpy(xd).float()
-
     """
+    xe_val, xd_val = preprocessed_data( validation_data,'Female', (T_encoder, T_decoder), tau0, model = "transformer")
+    xe_val = from_numpy(xe_val).float() 
+    xd_val = from_numpy(xd_val).float()
+
+    
     ## Model parameters
     dim_val = 512 # This can be any value divisible by n_heads. 512 is used in the original transformer paper.
     n_heads = 8 # The number of attention heads (aka parallel attention layers). dim_val must be divisible by this number
@@ -55,12 +62,6 @@ if __name__ == "__main__":
     max_seq_len = enc_seq_len # What's the longest sequence the model will encounter? Used to make the positional encoder
     num_predicted_features = 5
     batch_size = 5
-    
-
-    xe = batchify(xe, batch_size)  # shape [seq_len, batch_size]
-    xd = batchify(xd, batch_size)  # shape [seq_len, batch_size]
-    yd = batchify(yd, batch_size)  # shape [seq_len, batch_size]
-
 
 
     model = tst.TimeSeriesTransformer(
@@ -91,16 +92,48 @@ if __name__ == "__main__":
     scheduler = optim.lr_scheduler.StepLR(opt, 1.0, gamma=0.95)
     
     #Losses
-    all_losses = train(
+    best_val_loss = float('inf')
+    epochs = 2 
+    best_model = None
+
+    for epoch in range(1, epochs + 1):
+        epoch_start_time = time.time()
+        train(
         model = model, 
-        src = xe,
-        trg = xd,
+        train_data = (xe, xd),
         src_mask = xe_mask,
         tgt_mask = tgt_mask,
-        num_epochs = 1, 
+        epoch = 1, 
         optimizer = opt, 
+        lr = lr,
         criterion = loss)
-    
+        eval_data = (xe_val, xd_val)
+        val_loss = evaluate( model, eval_data, tgt_mask,  xe_mask, loss)
+        val_ppl = math.exp(val_loss)
+        elapsed = time.time() - epoch_start_time
+        print('-' * 89)
+        print(f'| end of epoch {epoch:3d} | time: {elapsed:5.2f}s | '
+            f'valid loss {val_loss:5.2f} | valid ppl {val_ppl:8.2f}')
+        print('-' * 89)
+
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            best_model = copy.deepcopy(model)
+
+        scheduler.step()
+
+
+
+    all_losses = train(
+        model = model, 
+        train_data = (xe, xd),
+        src_mask = xe_mask,
+        tgt_mask = tgt_mask,
+        epoch = 1, 
+        optimizer = opt, 
+        lr = lr,
+        criterion = loss)
+  
     # Mean Squared error
     output = model(
     src = xe, 

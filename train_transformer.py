@@ -11,63 +11,58 @@ import numpy as np
 from tqdm import tqdm
 from random import shuffle, choice
 from torch import Tensor
+import time
+import math
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-def batchify(data: Tensor, bsz: int) -> Tensor:
-    seq_len = data.size(0) // bsz
-    data = data[:seq_len * bsz]
-    data = data.view(bsz, seq_len).t().contiguous()
-    return data.to(device)
+bptt = 5
+def get_batch(source: Tensor, i: int):
 
+    return source[0][i, :,:,:], source[1][i, :,:,:]
 
-bptt = 35
-def get_batch(source: Tensor, i: int) -> Tuple[Tensor, Tensor]:
-    """
-    Args:
-        source: Tensor, shape [full_seq_len, batch_size]
-        i: int
+def train(model, train_data, tgt_mask, src_mask, epoch, optimizer,lr, criterion ) -> None:
+    model.train()  # turn on train mode
+    total_loss = 0.
+    log_interval = 200
+    start_time = time.time()
 
-    Returns:
-        tuple (data, target), where data has shape [seq_len, batch_size] and
-        target has shape [seq_len * batch_size]
-    """
-    seq_len = min(bptt, len(source) - 1 - i)
-    data = source[i:i+seq_len]
-    target = source[i+1:i+1+seq_len].reshape(-1)
-    return data, target
+    num_batches = len(train_data) // bptt
 
-def train(model, src, trg,tgt_mask, src_mask, num_epochs, optimizer, criterion ):
-    all_losses = []
-    src_shape = src.shape
-    trg_shape = trg.shape
-    
-    for epoch in tqdm(range(num_epochs)):
-        print(f'Epoch: {epoch}')
-        loss_agg = 0
-        
-        for idx in tqdm(range(len(trg))):
-            target_line_tensor = trg[idx]
-            input_line_tensor = src[idx]  
-            target_line_tensor = torch.reshape(target_line_tensor, (1,trg_shape[1],trg_shape[2]))
-            input_line_tensor = torch.reshape(input_line_tensor, (1,src_shape[1],src_shape[2]))
+    for batch_nb in (range(train_data[0].size(0))):
+        print(batch_nb)
+        data, targets = get_batch(train_data, batch_nb)
+        seq_len = data.size(0)
+        if seq_len != bptt:  # only on last batch
+            src_mask = src_mask[:seq_len, :seq_len]
+        output = model(data, targets, src_mask, tgt_mask)
+        loss = criterion(output, targets)
 
-            optimizer.zero_grad()
-            outputs = model(input_line_tensor, target_line_tensor, src_mask, tgt_mask)
+        optimizer.zero_grad()
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
+        optimizer.step()
 
-            loss = torch.stack(
-                [ criterion(o_i, t_i) for o_i ,t_i in zip(outputs, target_line_tensor)]
-            ).sum()
+        total_loss += loss.item()
+        if batch_nb % log_interval == 0 and batch_nb > 0:
+            ms_per_batch = (time.time() - start_time) * 1000 / log_interval
+            cur_loss = total_loss / log_interval
+            ppl = math.exp(cur_loss)
+            print(f'| epoch {epoch:3d} | {batch_nb:5d}/{num_batches:5d} batches | '
+                f'lr {lr:02.2f} | ms/batch {ms_per_batch:5.2f} | '
+                f'loss {cur_loss:5.2f} | ppl {ppl:8.2f}')
+            total_loss = 0
+            start_time = time.time()
 
-            loss.backward()
-            optimizer.step()
-            
-            loss_agg += loss.item()/ input_line_tensor.size(0)
-            
-            all_losses.append(loss_agg)
-            
-                    
-    return all_losses
-
-
-
+def evaluate(model, eval_data, tgt_mask,  src_mask, criterion) -> float:
+    model.eval()  # turn on evaluation mode
+    total_loss = 0.
+    with torch.no_grad():
+        for i in range(0, eval_data.size(0) - 1, bptt):
+            data, targets = get_batch(eval_data, i)
+            seq_len = data.size(0)
+            if seq_len != bptt:
+                src_mask = src_mask[:seq_len, :seq_len]
+            output = model(data, targets, src_mask, tgt_mask)
+            total_loss += seq_len * criterion(output, targets).item()
+    return total_loss / (len(eval_data) - 1)

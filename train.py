@@ -21,22 +21,6 @@ def batchify(data: Tensor, bsz: int) -> Tensor:
     return data.to(device)
 
 
-bptt = 35
-def get_batch(source: Tensor, i: int) -> Tuple[Tensor, Tensor]:
-    """
-    Args:
-        source: Tensor, shape [full_seq_len, batch_size]
-        i: int
-
-    Returns:
-        tuple (data, target), where data has shape [seq_len, batch_size] and
-        target has shape [seq_len * batch_size]
-    """
-    seq_len = min(bptt, len(source) - 1 - i)
-    data = source[i:i+seq_len]
-    target = source[i+1:i+1+seq_len].reshape(-1)
-    return data, target
-
 def train(model, src, trg,tgt_mask, src_mask, num_epochs, optimizer, criterion ):
     all_losses = []
     src_shape = src.shape
