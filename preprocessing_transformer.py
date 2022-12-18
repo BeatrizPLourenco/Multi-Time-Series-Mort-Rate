@@ -42,21 +42,25 @@ def transformer_input_shaping(padd_train,T_encoder, T_decoder,tau0, batch_size):
     n_train = t1 * a1 # number of training samples
     n_batches = n_train // batch_size
     delta0 = int(np.round((tau0-1)/2))
-    xtrain_encoder = np.empty((n_batches, batch_size, T_encoder,tau0)) #shaping
-    xtrain_encoder[:] = np.NaN 
-    xtrain_decoder = np.empty((n_batches, batch_size, T_decoder ,tau0)) #shaping
-    xtrain_decoder[:] = np.NaN 
+
+    x = np.empty((n_batches, batch_size, T_encoder,tau0)) #shaping
+    x[:] = np.NaN 
+    y_input = np.empty((n_batches, batch_size, T_decoder ,tau0)) #shaping
+    y_input[:] = np.NaN 
+    y_expected = np.empty((n_batches, batch_size, T_decoder ,tau0)) #shaping
+    y_expected[:] = np.NaN 
 
     for t0 in range(0,t1):   # t=time, t0 = 0..39 => year 1950..1990      df_train_cbind.shape = 50,104
         for a0 in range(0,a1): # a=age,  a0=0-99 a0 => age 0..99
             pattern_idx = t0*a1 + a0
             pattern_per_batch_idx = pattern_idx % batch_size
             batch_idx = pattern_idx // batch_size 
-            print(pattern_idx, batch_idx, (n_batches,n_train, T_encoder,tau0))
-            xtrain_encoder[batch_idx, pattern_per_batch_idx,:,:] = padd_train.iloc[t0 : (t0 + T_encoder), a0 : (a0 + tau0)].copy()  # copy years from t0 to t9 and ages from a0 to a0+5 into xt_train [100*t0+a0, :, :]
-            xtrain_decoder[batch_idx, pattern_per_batch_idx,:,:] = padd_train.iloc[(t0 + T_encoder - 1) : (t0 + T_encoder + T_decoder - 1), a0 : (a0 + tau0)].copy()  # copy years from t9 to t13 and ages from a0 to a0+5 into xt_train [100*t0+a0, :, :]
+            
+            x[batch_idx, pattern_per_batch_idx,:,:] = padd_train.iloc[t0 : (t0 + T_encoder), a0 : (a0 + tau0)].copy()  # copy years from t0 to t9 and ages from a0 to a0+5 into xt_train [100*t0+a0, :, :]
+            y_input[batch_idx, pattern_per_batch_idx,:,:] = padd_train.iloc[(t0 + T_encoder - 1) : (t0 + T_encoder + T_decoder - 1), a0 : (a0 + tau0)].copy()  # copy years from t9 to t13 and ages from a0 to a0+5 into xt_train [100*t0+a0, :, :]
+            y_expected[batch_idx, pattern_per_batch_idx,:,:] = padd_train.iloc[(t0 + T_encoder) : (t0 + T_encoder + T_decoder), a0 : (a0 + tau0)].copy()  # copy years from t9 to t13 and ages from a0 to a0+5 into xt_train [100*t0+a0, :, :]
 
-    return xtrain_encoder, xtrain_decoder
+    return x, y_input, y_expected
 
 
 
