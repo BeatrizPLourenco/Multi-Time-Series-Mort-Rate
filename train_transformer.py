@@ -27,13 +27,11 @@ def train(model, train_data, tgt_mask, src_mask, epoch, optimizer,lr, criterion 
     log_interval = 200
     start_time = time.time()
 
-    num_batches = len(train_data) // bptt
+    num_batches = train_data[0].size(0)
 
-    for batch_nb in (range(train_data[0].size(0))):
+    for batch_nb in range(num_batches):
         x, y_input, y_expected  = get_batch(train_data, batch_nb)
-        seq_len = x.size(2)
-        num_batches = x.size(0)
-        print(seq_len, num_batches)
+        seq_len = x.size(1)
 
         if seq_len != bptt:  # only on last batch
             src_mask = src_mask[:seq_len, :seq_len]
@@ -59,12 +57,16 @@ def train(model, train_data, tgt_mask, src_mask, epoch, optimizer,lr, criterion 
 def evaluate(model, eval_data, tgt_mask,  src_mask, criterion) -> float:
     model.eval()  # turn on evaluation mode
     total_loss = 0.
+    num_batches = eval_data[0].size(0)
+    batch_size = eval_data[0].size(1)
+    num_val_patterns = num_batches * batch_size
+
     with torch.no_grad():
-        for batch_nb in range(0, eval_data[0].size(0) - 1):
+        for batch_nb in range(num_batches):
             x_val, y_val_input, y_val_expected = get_batch(eval_data, batch_nb)
-            seq_len = x_val.size(2)
+            seq_len = x_val.size(1)
             if seq_len != bptt:
                 src_mask = src_mask[:seq_len, :seq_len]
             output = model(x_val, y_val_input, src_mask, tgt_mask)
             total_loss += seq_len * criterion(output, y_val_expected).item()
-    return total_loss / ( (x_val.size(0)*x_val.size(1)) - 1)
+    return total_loss /  (num_val_patterns - 1)
