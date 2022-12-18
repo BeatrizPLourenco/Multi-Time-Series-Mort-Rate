@@ -27,13 +27,16 @@ if __name__ == "__main__":
     T_encoder = 7
     T_decoder = 3
     tau0 = 5
+    split_value1 = 1999
+    split_value2 = 2009
     
     # Preprocessing
     data = preprocess_country_data(country, raw_filenamePT, raw_filenameSW)
     
     # Split Data
-    training_data, validation_data  = split_data(data, split_value)
-    
+    training_data, validation_test_data  = split_data(data, split_value1)
+    validation_data, test_data  = split_data(validation_test_data, split_value2)    
+
     training_data = data_to_logmat(training_data, 'Female')
     validation_data = data_to_logmat(validation_data, 'Female')
     
@@ -88,8 +91,8 @@ if __name__ == "__main__":
     # Defining loss function and optimizer
     loss = nn.MSELoss()
     lr = 0.05
-    opt = optim.SGD(model.parameters(), lr=lr)
-    scheduler = optim.lr_scheduler.StepLR(opt, 1.0, gamma=0.95)
+    opt = optim.Adam(model.parameters(), lr=lr,betas = (0.9, 0.98), eps = 1e-9)
+    scheduler = optim.lr_scheduler.StepLR(opt, 1.0, gamma=0.95, )
     
     #Losses
     best_val_loss = float('inf')
@@ -124,26 +127,6 @@ if __name__ == "__main__":
 
 
 
-    all_losses = train(
-        model = model, 
-        train_data = (xe, xd),
-        src_mask = xe_mask,
-        tgt_mask = tgt_mask,
-        epoch = 1, 
-        optimizer = opt, 
-        lr = lr,
-        criterion = loss)
-  
-    # Mean Squared error
-    output = model(
-    src = xe, 
-    tgt = xd,
-    src_mask=xe_mask,
-    tgt_mask=tgt_mask
-    )
-    
-    error = loss(output, yd)
-    print(f'The transformer error is at {error}.')
     
 
     

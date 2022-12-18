@@ -18,7 +18,6 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 bptt = 5
 def get_batch(source: Tensor, i: int):
-    print(len(source), i)
     return source[0][i, :,:,:], source[1][i, :,:,:], source[2][i, :,:,:]
 
 def train(model, train_data, tgt_mask, src_mask, epoch, optimizer,lr, criterion ) -> None:
@@ -28,8 +27,11 @@ def train(model, train_data, tgt_mask, src_mask, epoch, optimizer,lr, criterion 
     start_time = time.time()
 
     num_batches = train_data[0].size(0)
-
+    print(epoch, num_batches)
+    if epoch >=3:
+            print(train_data)
     for batch_nb in range(num_batches):
+        
         x, y_input, y_expected  = get_batch(train_data, batch_nb)
         seq_len = x.size(1)
 
