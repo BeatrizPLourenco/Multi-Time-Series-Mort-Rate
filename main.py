@@ -17,7 +17,8 @@ if __name__ == "__main__":
     
     # Control
     country = "PT"
-    split_value = 2000
+    split_value1 = 1999
+    split_value2 = 2009
     raw_filenamePT = 'Dataset/Mx_1x1_alt.txt'
     raw_filenameSW = 'Dataset/CHE_mort.xlsx'
     T = 10
@@ -29,7 +30,8 @@ if __name__ == "__main__":
     data = preprocess_country_data(country, raw_filenamePT, raw_filenameSW)
     
     # Split Data
-    training_data, validation_data  = split_data(data, split_value)
+    training_data, validation_test_data  = split_data(data, split_value1)
+    validation_data, test_data  = split_data(validation_test_data, split_value2)
     
     
     # preprocessing for the transformer

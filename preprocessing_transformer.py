@@ -12,29 +12,6 @@ from torch import Tensor, device, cuda
 
 device = device('cuda' if cuda.is_available() else 'cpu')
 
-def batchify(data: Tensor, bsz: int) -> Tensor:
-    seq_len = data.size(0) // bsz
-    data = data[:seq_len * bsz]
-    data = data.view(bsz, seq_len).t().contiguous()
-    return data.to(device)
-
-
-bptt = 35
-def get_batch(source: Tensor, i: int):
-    """
-    Args:
-        source: Tensor, shape [full_seq_len, batch_size]
-        i: int
-
-    Returns:
-        tuple (data, target), where data has shape [seq_len, batch_size] and
-        target has shape [seq_len * batch_size]
-    """
-    seq_len = min(bptt, len(source) - 1 - i)
-    data = source[i:i+seq_len]
-    target = source[i+1:i+1+seq_len].reshape(-1)
-    return data, target
-
 
 def transformer_input_shaping(padd_train,T_encoder, T_decoder,tau0, batch_size):
     t1 = padd_train.shape[0]-(T_encoder + T_decoder-1)-1

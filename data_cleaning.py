@@ -20,27 +20,11 @@ Original file is located at
 """
 
 from numpy.random import seed
-import tensorflow as tf
-from tensorflow.random import set_seed
-import pickle
-import os
-
 seed(1)
-set_seed(2)
 from os.path import exists
 import pandas as pd
 import numpy as np
-from statsmodels.tsa.arima_model import ARIMA
-import matplotlib.pyplot as plt
-import random
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import mean_squared_error
-import statsmodels.api as sm
-import seaborn as sns
-from mpl_toolkits.mplot3d import Axes3D
-import cvxpy as cp
-import pydot
-import graphviz
+
 
 """# Data Preparation"""
 
@@ -93,9 +77,9 @@ def override_missing_values(raw_data, years_wd = 2): #inputs values with the ave
     return raw_data
 
 def split_data(data, split_value):
-    training_data = data[data['Year'] < split_value]
-    validation_data = data[data['Year'] >= split_value]
-    return training_data, validation_data
+    _1st_data = data[data['Year'] < split_value]
+    _2nd_data = data[data['Year'] >= split_value]
+    return _1st_data, _2nd_data
 
 def preprocessing_dataPT(filename):
     dataPT = restructuring_data(dtPT)
