@@ -31,7 +31,10 @@ def train(model, train_data, tgt_mask, src_mask, epoch, optimizer,lr, criterion 
 
     for batch_nb in (range(train_data[0].size(0))):
         x, y_input, y_expected  = get_batch(train_data, batch_nb)
-        seq_len = x.size(0)
+        seq_len = x.size(2)
+        num_batches = x.size(0)
+        print(seq_len, num_batches)
+
         if seq_len != bptt:  # only on last batch
             src_mask = src_mask[:seq_len, :seq_len]
         output = model(x, y_input, src_mask, tgt_mask)
@@ -59,9 +62,9 @@ def evaluate(model, eval_data, tgt_mask,  src_mask, criterion) -> float:
     with torch.no_grad():
         for batch_nb in range(0, eval_data[0].size(0) - 1):
             x_val, y_val_input, y_val_expected = get_batch(eval_data, batch_nb)
-            seq_len = x_val.size(0)
+            seq_len = x_val.size(2)
             if seq_len != bptt:
                 src_mask = src_mask[:seq_len, :seq_len]
             output = model(x_val, y_val_input, src_mask, tgt_mask)
             total_loss += seq_len * criterion(output, y_val_expected).item()
-    return total_loss / (len(eval_data) - 1)
+    return total_loss / ( (x_val.size(0)*x_val.size(1)) - 1)

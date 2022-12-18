@@ -103,17 +103,17 @@ if __name__ == "__main__":
         train_data = (xe, xd, yd),
         src_mask = xe_mask,
         tgt_mask = tgt_mask,
-        epoch = 1, 
+        epoch = epoch, 
         optimizer = opt, 
         lr = lr,
         criterion = loss)
-        eval_data = (xe_val, xd_val, yd_val)
+        eval_data = (xe_val, xd_val, yd)
         val_loss = evaluate( model, eval_data, tgt_mask,  xe_mask, loss)
         val_ppl = math.exp(val_loss)
         elapsed = time.time() - epoch_start_time
         print('-' * 89)
         print(f'| end of epoch {epoch:3d} | time: {elapsed:5.2f}s | '
-            f'valid loss {val_loss:5.2f} | valid ppl {val_ppl:8.2f}')
+            f'valid loss {val_loss:5.2f}')
         print('-' * 89)
 
         if val_loss < best_val_loss:

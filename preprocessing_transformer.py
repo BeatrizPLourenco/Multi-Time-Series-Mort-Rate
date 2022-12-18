@@ -73,7 +73,6 @@ def data_to_logmat(raw_data, gender):
 def padding(raw_train,T,tau0):
 
     delta0 = int(np.round((tau0-1)/2))
-    print(delta0)
     padding = [0]*delta0
     padding.extend(np.arange(100))
     padding.extend([99]*delta0)
@@ -90,6 +89,7 @@ def preprocessed_data( logmat_train, gender, T , tau0, model = "LSTM", batch_siz
     #xe = minMaxScale(xe, all_data_mat)
     #xd = minMaxScale(xd, all_data_mat)
     return xe, xd, yd
+
 
 
 
