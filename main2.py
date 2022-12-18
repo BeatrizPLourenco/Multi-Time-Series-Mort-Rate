@@ -27,8 +27,8 @@ if __name__ == "__main__":
     T_encoder = 7
     T_decoder = 3
     tau0 = 5
-    split_value1 = 1999
-    split_value2 = 2009
+    split_value1 = 2000
+    split_value2 = 2010
     
     # Preprocessing
     data = preprocess_country_data(country, raw_filenamePT, raw_filenameSW)

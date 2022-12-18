@@ -17,8 +17,7 @@ if __name__ == "__main__":
     
     # Control
     country = "PT"
-    split_value1 = 1999
-    split_value2 = 2009
+    split_value = 2000
     raw_filenamePT = 'Dataset/Mx_1x1_alt.txt'
     raw_filenameSW = 'Dataset/CHE_mort.xlsx'
     T = 10
@@ -30,9 +29,8 @@ if __name__ == "__main__":
     data = preprocess_country_data(country, raw_filenamePT, raw_filenameSW)
     
     # Split Data
-    training_data, validation_test_data  = split_data(data, split_value1)
-    validation_data, test_data  = split_data(validation_test_data, split_value2)
-    
+    training_data, validation_data  = split_data(data, split_value)
+        
     
     # preprocessing for the transformer
     xe, xd, yd = preprocessed_data(data, training_data,'Female', (T_encoder, T_decoder), tau0, model = "transformer")
