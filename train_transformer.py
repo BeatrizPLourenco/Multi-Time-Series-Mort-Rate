@@ -19,7 +19,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 bptt = 5
 def get_batch(source: Tensor, i: int):
 
-    return source[0][i, :,:,:], source[1][i, :,:,:]
+    return source[0][i, :,:,:], source[1][i, :,:,:], source[2][i, :,:,:]
 
 def train(model, train_data, tgt_mask, src_mask, epoch, optimizer,lr, criterion ) -> None:
     model.train()  # turn on train mode
@@ -30,13 +30,12 @@ def train(model, train_data, tgt_mask, src_mask, epoch, optimizer,lr, criterion 
     num_batches = len(train_data) // bptt
 
     for batch_nb in (range(train_data[0].size(0))):
-        print(batch_nb)
-        data, targets = get_batch(train_data, batch_nb)
-        seq_len = data.size(0)
+        x, y_input, y_expected  = get_batch(train_data, batch_nb)
+        seq_len = x.size(0)
         if seq_len != bptt:  # only on last batch
             src_mask = src_mask[:seq_len, :seq_len]
-        output = model(data, targets, src_mask, tgt_mask)
-        loss = criterion(output, targets)
+        output = model(x, y_input, src_mask, tgt_mask)
+        loss = criterion(output, y_expected)
 
         optimizer.zero_grad()
         loss.backward()
@@ -59,10 +58,10 @@ def evaluate(model, eval_data, tgt_mask,  src_mask, criterion) -> float:
     total_loss = 0.
     with torch.no_grad():
         for batch_nb in range(0, eval_data[0].size(0) - 1):
-            data, targets = get_batch(eval_data, batch_nb)
-            seq_len = data.size(0)
+            x_val, y_val_input, y_val_expected = get_batch(eval_data, batch_nb)
+            seq_len = x_val.size(0)
             if seq_len != bptt:
                 src_mask = src_mask[:seq_len, :seq_len]
-            output = model(data, targets, src_mask, tgt_mask)
-            total_loss += seq_len * criterion(output, targets).item()
+            output = model(x_val, y_val_input, src_mask, tgt_mask)
+            total_loss += seq_len * criterion(output, y_val_expected).item()
     return total_loss / (len(eval_data) - 1)

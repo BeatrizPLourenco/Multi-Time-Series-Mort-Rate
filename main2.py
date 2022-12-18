@@ -38,14 +38,16 @@ if __name__ == "__main__":
     validation_data = data_to_logmat(validation_data, 'Female')
     
     # preprocessing for the transformer
-    xe, xd = preprocessed_data(training_data,'Female', (T_encoder, T_decoder), tau0, model = "transformer")
+    xe, xd, yd = preprocessed_data(training_data,'Female', (T_encoder, T_decoder), tau0, model = "transformer")
     xe = from_numpy(xe).float() 
     xd = from_numpy(xd).float()
+    yd = from_numpy(yd).float()
 
 
-    xe_val, xd_val = preprocessed_data( validation_data,'Female', (T_encoder, T_decoder), tau0, model = "transformer")
+    xe_val, xd_val, yd_val = preprocessed_data( validation_data,'Female', (T_encoder, T_decoder), tau0, model = "transformer")
     xe_val = from_numpy(xe_val).float() 
     xd_val = from_numpy(xd_val).float()
+    yd_val = from_numpy(yd_val).float()
 
     
     ## Model parameters
@@ -98,14 +100,14 @@ if __name__ == "__main__":
         epoch_start_time = time.time()
         train(
         model = model, 
-        train_data = (xe, xd),
+        train_data = (xe, xd, yd),
         src_mask = xe_mask,
         tgt_mask = tgt_mask,
         epoch = 1, 
         optimizer = opt, 
         lr = lr,
         criterion = loss)
-        eval_data = (xe_val, xd_val)
+        eval_data = (xe_val, xd_val, yd_val)
         val_loss = evaluate( model, eval_data, tgt_mask,  xe_mask, loss)
         val_ppl = math.exp(val_loss)
         elapsed = time.time() - epoch_start_time

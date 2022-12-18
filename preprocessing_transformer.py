@@ -86,10 +86,10 @@ def padding(raw_train,T,tau0):
 def preprocessed_data( logmat_train, gender, T , tau0, model = "LSTM", batch_size = 5):
     T_encoder, T_decoder = T
     padd_train= padding(logmat_train, T_encoder + T_decoder, tau0)
-    xe,xd = transformer_input_shaping(padd_train,T_encoder, T_decoder,tau0, batch_size)
+    xe,xd, yd = transformer_input_shaping(padd_train,T_encoder, T_decoder,tau0, batch_size)
     #xe = minMaxScale(xe, all_data_mat)
     #xd = minMaxScale(xd, all_data_mat)
-    return xe, xd
+    return xe, xd, yd
 
 
 
