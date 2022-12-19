@@ -29,7 +29,7 @@ if __name__ == "__main__":
     tau0 = 5
     split_value1 = 1989
     split_value2 = 2000
-    gender = 'Female'
+    gender = 'Male'
     
     # Preprocessing
     data = preprocess_country_data(country, raw_filenamePT, raw_filenameSW)
