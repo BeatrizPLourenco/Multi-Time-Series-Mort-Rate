@@ -9,7 +9,7 @@ Created on Fri Oct 14 18:23:31 2022
 from data_cleaning import preprocess_country_data, split_data
 from preprocessing import preprocessing_with_both_genders, preprocessed_data
 from preprocessing_transformer import preprocessed_data, data_to_logmat
-
+from scheduler import Scheduler
 import TimeSeriesTransformer as tst
 from torch import utils, from_numpy, nn, optim
 #from torch_training import train_model
@@ -27,8 +27,8 @@ if __name__ == "__main__":
     T_encoder = 7
     T_decoder = 3
     tau0 = 5
-    split_value1 = 2000
-    split_value2 = 2010
+    split_value1 = 1989
+    split_value2 = 2000
     
     # Preprocessing
     data = preprocess_country_data(country, raw_filenamePT, raw_filenameSW)
@@ -90,13 +90,18 @@ if __name__ == "__main__":
     
     # Defining loss function and optimizer
     loss = nn.MSELoss()
+
     lr = 0.05
-    opt = optim.Adam(model.parameters(), lr=lr,betas = (0.9, 0.98), eps = 1e-9)
-    scheduler = optim.lr_scheduler.StepLR(opt, 1.0, gamma=0.95, )
+    opt = optim.SGD(model.parameters(), lr = lr)
+    #opt = optim.Adam(model.parameters(), betas = (0.9, 0.98), eps = 1e-9)
+    scheduler = Scheduler(opt, dim_embed = dim_val, warmup_steps = 5)
+
+    #opt = optim.SGD(model.parameters(), lr=lr)
+    #scheduler = optim.lr_scheduler.StepLR(opt, 1.0, gamma=0.95, )
     
     #Losses
     best_val_loss = float('inf')
-    epochs = 2 
+    epochs = 5
     best_model = None
 
     for epoch in range(1, epochs + 1):
@@ -123,9 +128,14 @@ if __name__ == "__main__":
             best_val_loss = val_loss
             best_model = copy.deepcopy(model)
 
-        scheduler.step()
+        if scheduler is not None:
+            scheduler.step()
 
-
+test_loss = evaluate(best_model, test_data)
+print('=' * 89)
+print('| End of training | test loss {:5.2f} | test ppl {:8.2f}'.format(
+    test_loss, math.exp(test_loss)))
+print('=' * 89)
 
     
 

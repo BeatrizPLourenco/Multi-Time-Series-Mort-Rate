@@ -27,9 +27,6 @@ def train(model, train_data, tgt_mask, src_mask, epoch, optimizer,lr, criterion 
     start_time = time.time()
 
     num_batches = train_data[0].size(0)
-    print(epoch, num_batches)
-    if epoch >=3:
-        print(train_data)
     for batch_nb in range(num_batches):
         
         x, y_input, y_expected  = get_batch(train_data, batch_nb)
