@@ -54,7 +54,7 @@ if __name__ == "__main__":
     xd_val = from_numpy(xd_val).float()
     yd_val = from_numpy(yd_val).float()
 
-    xe_test, xd_test, yd_test = preprocessed_data(training_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
+    xe_test, xd_test, yd_test = preprocessed_data(test_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
     xe_test = from_numpy(xe_test).float() 
     xd_test = from_numpy(xd_test).float()
     yd_test = from_numpy(yd_test).float()
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     lr = 0.05
     opt = optim.SGD(model.parameters(), lr = lr)
     #opt = optim.Adam(model.parameters(), betas = (0.9, 0.98), eps = 1e-9)
-    scheduler = Scheduler(opt, dim_embed = dim_val, warmup_steps = 5)
+    scheduler = Scheduler(opt, dim_embed = dim_val, warmup_steps = 2)
 
     #opt = optim.SGD(model.parameters(), lr=lr)
     #scheduler = optim.lr_scheduler.StepLR(opt, 1.0, gamma=0.95, )
@@ -122,7 +122,7 @@ if __name__ == "__main__":
         optimizer = opt, 
         lr = lr,
         criterion = loss)
-        eval_data = (xe_val, xd_val, yd)
+        eval_data = (xe_val, xd_val, yd_val)
         val_loss = evaluate( model, eval_data, tgt_mask,  xe_mask, loss)
         val_ppl = math.exp(val_loss)
         elapsed = time.time() - epoch_start_time
@@ -138,7 +138,9 @@ if __name__ == "__main__":
         if scheduler is not None:
             scheduler.step()
 
+test_data = (xe_test, xd_test, yd_test)
 test_loss = evaluate(best_model, test_data, tgt_mask,  xe_mask, loss)
+training_data = (xe, xd, yd)
 training_loss = evaluate(best_model, training_data, tgt_mask,  xe_mask, loss)
 
 print('=' * 89)
