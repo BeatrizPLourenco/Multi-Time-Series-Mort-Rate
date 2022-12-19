@@ -132,9 +132,11 @@ if __name__ == "__main__":
             scheduler.step()
 
 test_loss = evaluate(best_model, test_data)
+training_loss = evaluate(best_model, training_data)
+
 print('=' * 89)
-print('| End of training | test loss {:5.2f} | test ppl {:8.2f}'.format(
-    test_loss, math.exp(test_loss)))
+print('| End of training | training loss {:5.2f} | test loss {:5.2f} | test ppl {:8.2f}'.format(
+    training_loss, test_loss, math.exp(test_loss)))
 print('=' * 89)
 
     
