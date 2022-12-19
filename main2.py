@@ -29,6 +29,7 @@ if __name__ == "__main__":
     tau0 = 5
     split_value1 = 1989
     split_value2 = 2000
+    gender = 'Female'
     
     # Preprocessing
     data = preprocess_country_data(country, raw_filenamePT, raw_filenameSW)
@@ -37,20 +38,26 @@ if __name__ == "__main__":
     training_data, validation_test_data  = split_data(data, split_value1)
     validation_data, test_data  = split_data(validation_test_data, split_value2)    
 
-    training_data = data_to_logmat(training_data, 'Female')
-    validation_data = data_to_logmat(validation_data, 'Female')
+    training_data = data_to_logmat(training_data, gender)
+    validation_data = data_to_logmat(validation_data, gender)
+    test_data = data_to_logmat(test_data, gender)
     
     # preprocessing for the transformer
-    xe, xd, yd = preprocessed_data(training_data,'Female', (T_encoder, T_decoder), tau0, model = "transformer")
+    xe, xd, yd = preprocessed_data(training_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
     xe = from_numpy(xe).float() 
     xd = from_numpy(xd).float()
     yd = from_numpy(yd).float()
 
 
-    xe_val, xd_val, yd_val = preprocessed_data( validation_data,'Female', (T_encoder, T_decoder), tau0, model = "transformer")
+    xe_val, xd_val, yd_val = preprocessed_data( validation_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
     xe_val = from_numpy(xe_val).float() 
     xd_val = from_numpy(xd_val).float()
     yd_val = from_numpy(yd_val).float()
+
+    xe_test, xd_test, yd_test = preprocessed_data(training_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
+    xe_test = from_numpy(xe_test).float() 
+    xd_test = from_numpy(xd_test).float()
+    yd_test = from_numpy(yd_test).float()
 
     
     ## Model parameters
@@ -131,8 +138,8 @@ if __name__ == "__main__":
         if scheduler is not None:
             scheduler.step()
 
-test_loss = evaluate(best_model, test_data)
-training_loss = evaluate(best_model, training_data)
+test_loss = evaluate(best_model, test_data, tgt_mask,  xe_mask, loss)
+training_loss = evaluate(best_model, training_data, tgt_mask,  xe_mask, loss)
 
 print('=' * 89)
 print('| End of training | training loss {:5.2f} | test loss {:5.2f} | test ppl {:8.2f}'.format(
