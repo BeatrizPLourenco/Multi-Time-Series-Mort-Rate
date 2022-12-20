@@ -59,13 +59,44 @@ def padding(raw_train,T,tau0):
     #print("Dataset with padding: \n",padd_train)
     return padd_train
 
-def preprocessed_data( logmat_train, gender, T , tau0, model = "LSTM", batch_size = 5):
+def preprocessed_data( logmat, gender, T , tau0, batch_size = 5):
     T_encoder, T_decoder = T
-    padd_train= padding(logmat_train, T_encoder + T_decoder, tau0)
+    padd_train= padding(logmat, T_encoder + T_decoder, tau0)
     xe,xd, yd = transformer_input_shaping(padd_train,T_encoder, T_decoder,tau0, batch_size)
-    #xe = minMaxScale(xe, all_data_mat)
-    #xd = minMaxScale(xd, all_data_mat)
     return xe, xd, yd
+
+
+def preprocessing_with_both_genders(logmat, T, tau0, batch_size):
+
+    data0 = (preprocessed_data(logmat, 'Female', T, tau0, batch_size)) # only training data
+    data1 = (preprocessed_data(logmat, 'Male', T, tau0, batch_size))
+
+    d = data0[0].shape[0]
+    T_encoder = T[0]
+    T_decoder = T[1]
+
+    dimensions = (d * 2, batch_size, T[0], T[1])
+
+
+    d = data0[0].shape[0]
+    xe = np.empty ((2*d, batch_size, T_encoder, tau0)) #shaping
+    xe[:] = np.NaN
+    xd = np.empty ((2*d, batch_size, T_decoder, tau0)) #shaping
+    xd[:] = np.NaN
+    yd = np.empty((2*d, batch_size, T_decoder, tau0))
+    yd[:] = np.NaN
+    gender_indicator = np.array(([0] * batch_size + [1] * batch_size)  * d)
+
+    for i in range(d):
+        for j in range(batch_size):
+            xe[(i)*2] = data0[0][i, j, :, :] #odd indexes corresponde to training pattern from the female dataset
+            xe[(i)*2+1] = data1[0][i, j, :, :] #even indexes corresponde to training pattern from the male dataset
+            xd[(i)*2] = data0[0][i, j, :, :] #odd indexes corresponde to training pattern from the female dataset
+            xd[(i)*2+1] = data1[0][i, j, :, :] #even indexes corresponde to training pattern from the male dataset
+            yd[(i)*2] = data0[2][i, j, :, :] 
+            yd[(i)*2+1] = data1[2][i, j, :, :] 
+
+    return xe, xd, gender_indicator, yd
 
 
 
