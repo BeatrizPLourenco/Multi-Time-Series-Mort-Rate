@@ -43,13 +43,15 @@ if __name__ == "__main__":
     if gender == 'both':
         xe, xd, gender_idx, yd = preprocessing_with_both_genders(training_data, (T_encoder, T_decoder), tau0)
         xe, xd, gender_idx, yd  = from_numpy(xe).float(), from_numpy(xd).float(), from_numpy(gender_idx).float(), from_numpy(yd).float()
-        
-        xe_val, xd_val, yd_val = preprocessing_with_both_genders( validation_data, (T_encoder, T_decoder), tau0)
-        xe_val, xd_val, yd_val  = from_numpy(xe_val).float(), from_numpy(xd_val).float(), from_numpy(yd_val).float()
+        train_data = (xe, xd, gender_idx, yd)
 
-        xe_test, xd_test, yd_test = preprocessing_with_both_genders(test_data, (T_encoder, T_decoder), tau0)
-        xe_test, xd_test, yd_test  = from_numpy(xe_test).float(), from_numpy(xd_test).float(), from_numpy(yd_test).float()
+        xe_val, xd_val, gender_idx_val, yd_val = preprocessing_with_both_genders( validation_data, (T_encoder, T_decoder), tau0)
+        xe_val, xd_val, gender_idx_val, yd_val  = from_numpy(xe_val).float(), from_numpy(xd_val).float(), from_numpy(gender_idx_val).float(), from_numpy(yd_val).float()
+        val_data = (xe_val, xd_val, gender_idx_val, yd_val )
 
+        xe_test, xd_test, gender_idx_test, yd_test = preprocessing_with_both_genders(test_data, (T_encoder, T_decoder), tau0)
+        xe_test, xd_test, gender_idx_test, yd_test  = from_numpy(xe_test).float(), from_numpy(xd_test).float(), from_numpy(gender_idx_test).float(), from_numpy(yd_test).float()
+        test_data = (xe_test, xd_test, gender_idx_test, yd_test)
 
 """
     elif gender == 'Male' or gender == 'Female' :
