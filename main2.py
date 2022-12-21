@@ -7,8 +7,8 @@ Created on Fri Oct 14 18:23:31 2022
 """
 
 from data_cleaning import preprocess_country_data, split_data
-from preprocessing import preprocessing_with_both_genders, preprocessed_data
-from preprocessing_transformer import preprocessed_data, data_to_logmat
+from preprocessing import  preprocessed_data
+from preprocessing_transformer import preprocessed_data, data_to_logmat, preprocessing_with_both_genders
 from scheduler import Scheduler
 import TimeSeriesTransformer as tst
 from torch import utils, from_numpy, nn, optim
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     tau0 = 5
     split_value1 = 1989
     split_value2 = 2000
-    gender = 'Male'
+    gender = 'both'
     
     # Preprocessing
     data = preprocess_country_data(country, raw_filenamePT, raw_filenameSW)
@@ -38,26 +38,30 @@ if __name__ == "__main__":
     training_data, validation_test_data  = split_data(data, split_value1)
     validation_data, test_data  = split_data(validation_test_data, split_value2)    
 
-    training_data = data_to_logmat(training_data, gender)
-    validation_data = data_to_logmat(validation_data, gender)
-    test_data = data_to_logmat(test_data, gender)
     
     # preprocessing for the transformer
-    xe, xd, yd = preprocessed_data(training_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
-    xe = from_numpy(xe).float() 
-    xd = from_numpy(xd).float()
-    yd = from_numpy(yd).float()
+    if gender == 'both':
+        xe, xd, gender_idx, yd = preprocessing_with_both_genders(training_data, (T_encoder, T_decoder), tau0)
+        xe, xd, gender_idx, yd  = from_numpy(xe).float(), from_numpy(xd).float(), from_numpy(gender_idx).float(), from_numpy(yd).float()
+        
+        xe_val, xd_val, yd_val = preprocessing_with_both_genders( validation_data, (T_encoder, T_decoder), tau0)
+        xe_val, xd_val, yd_val  = from_numpy(xe_val).float(), from_numpy(xd_val).float(), from_numpy(yd_val).float()
+
+        xe_test, xd_test, yd_test = preprocessing_with_both_genders(test_data, (T_encoder, T_decoder), tau0)
+        xe_test, xd_test, yd_test  = from_numpy(xe_test).float(), from_numpy(xd_test).float(), from_numpy(yd_test).float()
 
 
-    xe_val, xd_val, yd_val = preprocessed_data( validation_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
-    xe_val = from_numpy(xe_val).float() 
-    xd_val = from_numpy(xd_val).float()
-    yd_val = from_numpy(yd_val).float()
+"""
+    elif gender == 'Male' or gender == 'Female' :
+        xe, xd, yd = preprocessed_data( training_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
+        xe, xd, yd  = from_numpy(xe).float(), from_numpy(xd).float(), from_numpy(yd).float()
 
-    xe_test, xd_test, yd_test = preprocessed_data(test_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
-    xe_test = from_numpy(xe_test).float() 
-    xd_test = from_numpy(xd_test).float()
-    yd_test = from_numpy(yd_test).float()
+        xe_val, xd_val, yd_val = preprocessed_data( validation_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
+        xe_val, xd_val, yd_val  = from_numpy(xe_val).float(), from_numpy(xd_val).float(), from_numpy(yd_val).float()
+
+        xe_test, xd_test, yd_test = preprocessed_data(test_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
+        xe_test, xd_test, yd_test  = from_numpy(xe_test).float(), from_numpy(xd_test).float(), from_numpy(yd_test).float()
+
 
     
     ## Model parameters
@@ -148,6 +152,6 @@ print('| End of training | training loss {:5.2f} | test loss {:5.2f} | test ppl 
     training_loss, test_loss, math.exp(test_loss)))
 print('=' * 89)
 
-    
+    """
 
     
