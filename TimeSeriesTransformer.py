@@ -97,17 +97,14 @@ class TimeSeriesTransformer(nn.Module):
             )
         
         self.linear_mapping = nn.Linear(
-            in_features=dim_val,
-            out_features=num_predicted_features
+            in_features = dim_val,
+            out_features = num_predicted_features
             )
 
-        if self.both_gender_model:
-            in_linear_mapping = num_predicted_features + 1
 
-
-        self.linear_mapping = nn.Linear(
-            in_features=in_linear_mapping,
-            out_features=num_predicted_features
+        self.linear_mapping_and_gender_ind = nn.Linear(
+            in_features = dim_val + 1,
+            out_features = num_predicted_features
             )
 
     def forward(self, src: Tensor, tgt: Tensor, src_mask: Tensor=None, 
@@ -157,12 +154,13 @@ class TimeSeriesTransformer(nn.Module):
         output = decoder_output
 
         if self.both_gender_model:
-            output = concat([decoder_output, gender_index], dim = 1)
-        
+            output = concat([decoder_output, gender_index], dim = 2)
+            output = self.linear_mapping_and_gender_ind(output)
+
         else: 
             output = decoder_output
+            output = self.linear_mapping(output) # shape [batch_size, target seq len]
 
-        output = self.linear_mapping(output) # shape [batch_size, target seq len]
 
         return output
     

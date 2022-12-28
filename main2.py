@@ -63,7 +63,7 @@ if __name__ == "__main__":
         xe_test, xd_test, gender_idx_test, yd_test  = from_numpy(xe_test).float(), from_numpy(xd_test).float(), from_numpy(yd_test).float()
 
     train_data = (xe, xd, gender_idx, yd)
-    val_data = (xe_val, xd_val, gender_idx_val, yd_val )
+    eval_data = (xe_val, xd_val, gender_idx_val, yd_val )
     test_data = (xe_test, xd_test, gender_idx_test, yd_test)
 
     

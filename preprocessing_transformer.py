@@ -90,8 +90,8 @@ def preprocessing_with_both_genders(data, T, tau0, batch_size = 5, num_out_featu
     xd[:] = np.NaN
     yd = np.empty((2*d, batch_size, T_decoder, num_out_features))
     yd[:] = np.NaN
-    gender_indicator = np.array(([0]*T_decoder+[1]*T_decoder) * d * batch_size)
-    gender_indicator = np.reshape(gender_indicator, [2*d, batch_size])
+    gender_indicator = np.array([([0]*T_decoder+[1]*T_decoder)] * d * batch_size)
+    gender_indicator = np.reshape(gender_indicator, [2*d, batch_size, T_decoder, num_out_features])
 
 
     for i in range(d):
