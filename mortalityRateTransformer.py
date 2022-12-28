@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat Oct 15 09:58:22 2022
+Created on Sat Oct 15 2022
 
 @author: beatrizlourenco
 
@@ -55,7 +55,7 @@ class MortalityRateTransformer(nn.Module):
             d_model: Dimension of intermidiate layers. Can be any value divisible by n_heads. 
             n_decoder_layers: Number of times the decoder layer is stacked in the decoder.
             n_encoder_layers: Number of times the encoder layer is stacked in the encoder.
-            T_encoder: Number of timesteps fed to the enconder.
+            T_encoder: Number of timesteps fed to the encoder.
             T_decoder: Number of timesteps fed to the decoder.
             dropout_encoder: Dropout probability used in the encoder layer.
             dropout_decoder: Dropout probability used in the decoder layer.
@@ -85,13 +85,15 @@ class MortalityRateTransformer(nn.Module):
         self.positional_encoding_layer_enc = pe.PositionalEncoder(
             d_model = d_model,
             dropout = dropout_pos_enc,
-            max_seq_len = T_encoder
+            max_seq_len = T_encoder,
+            batch_first = batch_first
             )
 
         self.positional_encoding_layer_dec = pe.PositionalEncoder(
             d_model = d_model,
             dropout = dropout_pos_enc,
-            max_seq_len = T_decoder
+            max_seq_len = T_decoder,
+            batch_first = batch_first
             )
 
         encoder_layer = nn.TransformerEncoderLayer(
@@ -132,48 +134,36 @@ class MortalityRateTransformer(nn.Module):
             out_features = num_predicted_features
             )
 
-    def forward(self, src: Tensor, tgt: Tensor, src_mask: Tensor=None, 
-                tgt_mask: Tensor=None, gender_index: Tensor=None) -> Tensor:
-        """
-        Returns a tensor of shape:
-        [target_sequence_length, batch_size, num_predicted_features]
+    def forward(self, src: Tensor, 
+                tgt: Tensor, 
+                gender_index: Tensor=None,
+                enc_out_mask: Tensor=None, 
+                dec_in_mask: Tensor=None) -> Tensor:
+
+        """Forward pass of the Neural Network.
         
         Args:
-            src: the encoder's output sequence. Shape: (S,E) for unbatched input, 
-                 (S, N, E) if batch_first=False or (N, S, E) if 
-                 batch_first=True, where S is the source sequence length, 
-                 N is the batch size, and E is the number of features (1 if univariate)
-            tgt: the sequence to the decoder. Shape: (T,E) for unbatched input, 
-                 (T, N, E)(T,N,E) if batch_first=False or (N, T, E) if 
-                 batch_first=True, where T is the target sequence length, 
-                 N is the batch size, and E is the number of features (1 if univariate)
-            src_mask: the mask for the src sequence to prevent the model from 
-                      using data points from the target sequence
-            tgt_mask: the mask for the tgt sequence to prevent the model from
-                      using data points from the target sequence
+            src (Tensor): the encoder's input sequence. Shape: (T,E) for unbatched input, (B, T, E) if batch_first=False or (T, B, E) if batch_first=True, where T is the source sequence length, B is the batch size, and E is the number of features (1 if univariate)
+            tgt (Tensor): the decoder's input sequence. Shape: (T,E) for unbatched input, (B, T, E) if batch_first=False or (T, B, E) if batch_first=True, where T is the target sequence length, B is the batch size, and E is the number of features (1 if univariate)
+            enc_out_mask (Tensor): the mask for the src sequence to prevent the model from using data points from the target sequence
+            dec_in_mask (Tensor): the mask for the tgt sequence to prevent the model from using data points from the target sequence
+        
+        Returns:
+            Tensor with shape: [T_decoder, batch_size, num_predicted_features]
         """
 
 
-        encoder_input = self.encoder_input_layer( src ) 
+        encoder_input = self.encoder_input_layer( src ) # src shape: [batch_size, enc_seq_len, d_model] regardless of number of input features
 
         encoder_input = self.positional_encoding_layer_enc( encoder_input ) 
 
-        encoder_output = self.encoder( src = encoder_input ) # src shape: [batch_size, enc_seq_len, d_model]
-
+        encoder_output = self.encoder( src = encoder_input ) 
             
-        decoder_input = self.decoder_input_layer( tgt ) # src shape: [target sequence length, batch_size, d_model] regardless of number of input features
+        decoder_input = self.decoder_input_layer( tgt )
 
-        decoder_input = self.positional_encoding_layer_dec( decoder_input ) # src shape: [batch_size, src length, d_model] regardless of number of input features
+        decoder_input = self.positional_encoding_layer_dec( decoder_input )
 
-
-        decoder_output = self.decoder(
-            tgt=decoder_input,
-            memory=encoder_output,
-            tgt_mask=tgt_mask,
-            memory_mask=src_mask
-            ) # output shape: [batch_size, target seq len, d_model]
-
-        output = decoder_output
+        decoder_output = self.decoder( tgt = decoder_input, memory = encoder_output, tgt_mask = dec_in_mask, memory_mask = enc_out_mask )
 
         if self.both_gender_model:
             output = concat([decoder_output, gender_index], dim = 2)
@@ -188,19 +178,15 @@ class MortalityRateTransformer(nn.Module):
     
     
 def generate_square_subsequent_mask(dim1: int, dim2: int) -> Tensor:
-    """
-    Generates an upper-triangular matrix of -inf, with zeros on diag.
+    """Generates an upper-triangular matrix of -inf with zeros on diag.
 
-    Source:
-    https://pytorch.org/tutorials/beginner/transformer_tutorial.html
+    Note: This function is copy pasted from https://pytorch.org/tutorials/beginner/transformer_tutorial.html
 
     Args:
-        dim1: int, for both src and tgt masking, this must be target sequence
-              length
-        dim2: int, for src masking this must be encoder sequence length (i.e. 
-              the length of the input sequence to the model), 
-              and for tgt masking, this must be target sequence length 
-    Return:
+        dim1 (int): for both src and tgt masking, this must be target sequence length
+        dim2 (int): for src masking this must be encoder sequence length and, for tgt masking, this must be target sequence length 
+
+    Returns:
         A Tensor of shape [dim1, dim2]
     """
     return triu(ones(dim1, dim2) * float('-inf'), diagonal=1)

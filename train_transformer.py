@@ -35,7 +35,7 @@ def train(model, train_data, tgt_mask, src_mask, epoch, optimizer,lr, criterion)
 
         if seq_len != bptt:  # only on last batch
             src_mask = src_mask[:seq_len, :seq_len]
-        output = model(x, y_input, src_mask, tgt_mask, gender_index)
+        output = model(x, y_input, gender_index, src_mask, tgt_mask)
         loss = criterion(output, y_expected)
 
         optimizer.zero_grad()
@@ -67,6 +67,6 @@ def evaluate(model, eval_data, tgt_mask,  src_mask, criterion) -> float:
             seq_len = x_val.size(1)
             if seq_len != bptt:
                 src_mask = src_mask[:seq_len, :seq_len]
-            output = model(x_val, y_val_input, src_mask, tgt_mask, gender_idx)
+            output = model(x_val, y_val_input, gender_idx , src_mask, tgt_mask)
             total_loss += seq_len * criterion(output, y_val_expected).item()
     return total_loss /  (num_val_patterns - 1)
