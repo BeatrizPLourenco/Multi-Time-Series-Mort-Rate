@@ -26,10 +26,10 @@ class PositionalEncoder(nn.Module):
 
     def __init__(
         self, 
-        dropout: float=0.1, 
-        max_seq_len: int=5000, 
-        d_model: int=512,
-        batch_first: bool=False
+        dropout: float = 0.1, 
+        max_seq_len: int = 5000, 
+        d_model: int = 512,
+        batch_first: bool = True
         ):
 
         """

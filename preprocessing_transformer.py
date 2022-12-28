@@ -94,8 +94,8 @@ def preprocessing_with_both_genders(data, T, tau0, batch_size = 5, num_out_featu
     gender_indicator = np.reshape(gender_indicator, [2*d, batch_size, T_decoder, num_out_features])
 
 
-    for i in range(d):
-        for j in range(batch_size):
+    for i in range(0, d):
+        for j in range(0, batch_size):
             xe[(i)*2] = data0[0][i][j] #even indexes corresponde to training pattern from the female dataset
             xd[(i)*2] = data0[1][i][j]
             yd[(i)*2] = data0[3][i][j]

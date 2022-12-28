@@ -14,30 +14,30 @@ import positional_encoder as pe
 import torch.nn.functional as F
 
 
-class mortalityRateTransformer(nn.Module):
-    """Transformer model for predicting mortality rates with age and gender.
-
-    If the class has public attributes, they may be documented here
-    in an ``Attributes`` section and follow the same formatting as a
-    function's ``Args`` section. Alternatively, attributes may be documented
-    inline with the attribute's declaration (see __init__ method below).
-
-    Properties created with the ``@property`` decorator should be documented
-    in the property's getter method.
+class MortalityRateTransformer(nn.Module):
+    """Transformer model for predicting mortality rates with age and gender. Follows the paper: N. Wu, B. Green, X. Ben, and S. O’Banion. Deep transformer models for time series forecasting: The influenza prevalence case.
 
     Attributes:
-        attr1 (str): Description of `attr1`.
-        attr2 (:obj:`int`, optional): Description of `attr2`.
-
+        both_gender_model (bool): True if the model forecasting 2 gender. False otherwise
+        encoder_input_layer (nn.Linear): input linear layers needed for the encoder.
+        decoder_input_layer (nn.Linear): input linear layers needed for the decoder.
+        positional_encoding_layer (pe.PositionalEncoder): positional enconding layer for recording the sequence steps relative position.
+        encoder (nn.TransformerEncoder): stack of multiple encoder layers in nn.TransformerEncoder.
+        decoder (nn.TransformerDecoder): stack of multiple decoder layers in nn.TransformerEncoder.
+        linear_mapping (nn.Linear): linear output for One Gender Model.
+        linear_mapping_with_gender_ind (nn.Linear): linear output for two Gender Model.
+        
     """
+
     def __init__(self, 
         input_size: int,
-        dec_seq_len: int,
         batch_first: bool = True,
-        dim_val: int = 512,  
+        n_heads: int = 8,
+        d_model: int = 512,  
         n_encoder_layers: int = 4,
         n_decoder_layers: int = 4,
-        n_heads: int = 8,
+        T_encoder: int = 3,
+        T_decoder: int = 7,
         dropout_encoder: float = 0.2, 
         dropout_decoder: float = 0.2,
         dropout_pos_enc: float = 0.1,
@@ -47,76 +47,88 @@ class mortalityRateTransformer(nn.Module):
         both_gender_model: bool = False
         ): 
 
+        """
+        Args:
+            input_size: The number of input variables. 1 if univariate forecasting.
+            batch_first: Defines the shape of the received input. Shape: (T, B, E) if batch_first = False or (B, T, E) if batch_first = True, where T is the source sequence length, B is the batch size, and E is the number of features (1 if univariate)
+            n_heads: The number of attention heads (aka parallel attention layers).
+            d_model: Dimension of intermidiate layers. Can be any value divisible by n_heads. 
+            n_decoder_layers: Number of times the decoder layer is stacked in the decoder.
+            n_encoder_layers: Number of times the encoder layer is stacked in the encoder.
+            T_encoder: Number of timesteps fed to the enconder.
+            T_decoder: Number of timesteps fed to the decoder.
+            dropout_encoder: Dropout probability used in the encoder layer.
+            dropout_decoder: Dropout probability used in the decoder layer.
+            dropout_pos_enc: Dropout probability used in the positional encoder layer.
+            dim_feedforward_encoder: Dimension of feed forward layers in the encoder.
+            dim_feedforward_decoder: Dimension of feed forward layers in the decoder.
+            num_predicted_features: Dimension of each output timestep.
+            both_gender_model: Setting the atribute both_gender_model.
+
+        """
+
 
         super().__init__() 
 
         self.both_gender_model = both_gender_model
 
-        self.dec_seq_len = dec_seq_len
-
-
-        # Creating the three linear layers needed for the model
         self.encoder_input_layer = nn.Linear(
-            in_features=input_size, 
-            out_features=dim_val 
+            in_features = input_size, 
+            out_features = d_model 
             )
 
         self.decoder_input_layer = nn.Linear(
-            in_features=num_predicted_features,
-            out_features=dim_val
+            in_features = num_predicted_features,
+            out_features = d_model
             )  
-        
-        self.linear_mapping = nn.Linear(
-            in_features=dim_val, 
-            out_features=num_predicted_features
+
+        self.positional_encoding_layer_enc = pe.PositionalEncoder(
+            d_model = d_model,
+            dropout = dropout_pos_enc,
+            max_seq_len = T_encoder
             )
 
-        # Create positional encoder
-        self.positional_encoding_layer = pe.PositionalEncoder(
-            d_model=dim_val,
-            dropout=dropout_pos_enc
+        self.positional_encoding_layer_dec = pe.PositionalEncoder(
+            d_model = d_model,
+            dropout = dropout_pos_enc,
+            max_seq_len = T_decoder
             )
 
-        # Create one encoder layer
         encoder_layer = nn.TransformerEncoderLayer(
-            d_model=dim_val, 
-            nhead=n_heads,
-            dim_feedforward=dim_feedforward_encoder,
-            dropout=dropout_encoder,
-            batch_first=batch_first
+            d_model = d_model, 
+            nhead = n_heads,
+            dim_feedforward = dim_feedforward_encoder,
+            dropout = dropout_encoder,
+            batch_first = batch_first
             )
 
-        # Stack the encoder layers in nn.TransformerEncoder
         self.encoder = nn.TransformerEncoder(
             encoder_layer=encoder_layer,
             num_layers=n_encoder_layers, 
             norm=None
             )
-        # Create one decoder layer
+
         decoder_layer = nn.TransformerDecoderLayer(
-            d_model=dim_val,
+            d_model=d_model,
             nhead=n_heads,
             dim_feedforward=dim_feedforward_decoder,
             dropout=dropout_decoder,
             batch_first=batch_first
             )
 
-        # Stack the decoder layers in nn.TransformerDecoder
         self.decoder = nn.TransformerDecoder(
             decoder_layer=decoder_layer,
             num_layers=n_decoder_layers, 
             norm=None
             )
         
-        # Create a linear output for One Gender Model
         self.linear_mapping = nn.Linear(
-            in_features = dim_val,
+            in_features = d_model,
             out_features = num_predicted_features
             )
 
-        # Create a linear output for Two Gender Model
-        self.linear_mapping_and_gender_ind = nn.Linear(
-            in_features = dim_val + 1,
+        self.linear_mapping_with_gender_ind = nn.Linear(
+            in_features = d_model + 1,
             out_features = num_predicted_features
             )
 
@@ -143,20 +155,23 @@ class mortalityRateTransformer(nn.Module):
 
 
         # Pass throguh the input layer right before the encoder
-        src = self.encoder_input_layer(src) # src shape: [batch_size, src length, dim_val] regardless of number of input features
+        src = self.encoder_input_layer(src) # src shape: [batch_size, src length, d_model] regardless of number of input features
 
         # Pass through the positional encoding layer
-        src = self.positional_encoding_layer(src) # src shape: [batch_size, src length, dim_val] regardless of number of input features
+        src = self.positional_encoding_layer_enc(src) # src shape: [batch_size, src length, d_model] regardless of number of input features
 
         # Pass through all the stacked encoder layers in the encoder
-        src = self.encoder( # src shape: [batch_size, enc_seq_len, dim_val]
+        src = self.encoder( # src shape: [batch_size, enc_seq_len, d_model]
             src=src
             )
 
-        # Pass decoder input through decoder input layer
-        decoder_output = self.decoder_input_layer(tgt) # src shape: [target sequence length, batch_size, dim_val] regardless of number of input features
+        
+        tgt = self.positional_encoding_layer_dec(tgt) # src shape: [batch_size, src length, d_model] regardless of number of input features
 
-        # Pass throguh decoder - output shape: [batch_size, target seq len, dim_val]
+        # Pass decoder input through decoder input layer
+        decoder_output = self.decoder_input_layer(tgt) # src shape: [target sequence length, batch_size, d_model] regardless of number of input features
+
+        # Pass throguh decoder - output shape: [batch_size, target seq len, d_model]
         decoder_output = self.decoder(
             tgt=decoder_output,
             memory=src,
@@ -168,7 +183,7 @@ class mortalityRateTransformer(nn.Module):
 
         if self.both_gender_model:
             output = concat([decoder_output, gender_index], dim = 2)
-            output = self.linear_mapping_and_gender_ind(output)
+            output = self.linear_mapping_with_gender_ind(output)
 
         else: 
             output = decoder_output
@@ -181,8 +196,10 @@ class mortalityRateTransformer(nn.Module):
 def generate_square_subsequent_mask(dim1: int, dim2: int) -> Tensor:
     """
     Generates an upper-triangular matrix of -inf, with zeros on diag.
+
     Source:
     https://pytorch.org/tutorials/beginner/transformer_tutorial.html
+    
     Args:
         dim1: int, for both src and tgt masking, this must be target sequence
               length

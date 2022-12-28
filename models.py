@@ -1,9 +1,8 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Sat Oct 15 09:51:02 2022
 
-@author: beatrizlourenco
+Adapted from: 
+https://pytorch.org/tutorials/beginner/transformer_tutorial.html
 """
 
 import torch
@@ -12,17 +11,6 @@ import math
 from torch import nn, Tensor
 
 class PositionalEncoder(nn.Module):
-    """
-    The authors of the original transformer paper describe very succinctly what 
-    the positional encoding layer does and why it is needed:
-    
-    "Since our model contains no recurrence and no convolution, in order for the 
-    model to make use of the order of the sequence, we must inject some 
-    information about the relative or absolute position of the tokens in the 
-    sequence." (Vaswani et al, 2017)
-    Adapted from: 
-    https://pytorch.org/tutorials/beginner/transformer_tutorial.html
-    """
 
     def __init__(
         self, 
@@ -37,7 +25,6 @@ class PositionalEncoder(nn.Module):
             dropout: the dropout rate
             max_seq_len: the maximum length of the input sequences
             d_model: The dimension of the output of sub-layers in the model 
-                     (Vaswani et al, 2017)
         """
 
         super().__init__()
