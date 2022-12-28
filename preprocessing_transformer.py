@@ -13,7 +13,7 @@ from torch import Tensor, device, cuda
 device = device('cuda' if cuda.is_available() else 'cpu')
 
 
-def transformer_input_shaping(padd_train,T_encoder, T_decoder,tau0, batch_size):
+def transformer_input_shaping(padd_train,T_encoder, T_decoder,tau0, batch_size, num_out_features):
     map = {'female' : 0, 'male' : 1}
 
     t1 = padd_train.shape[0]-(T_encoder + T_decoder-1)-1
@@ -24,9 +24,9 @@ def transformer_input_shaping(padd_train,T_encoder, T_decoder,tau0, batch_size):
 
     x = np.empty((n_batches, batch_size, T_encoder,tau0)) #shaping
     x[:] = np.NaN 
-    y_input = np.empty((n_batches, batch_size)) #shaping
+    y_input = np.empty((n_batches, batch_size, T_decoder, num_out_features)) #shaping
     y_input[:] = np.NaN 
-    y_expected = np.empty((n_batches, batch_size)) #shaping
+    y_expected = np.empty((n_batches, batch_size, T_decoder, num_out_features)) #shaping
     y_expected[:] = np.NaN 
 
     for t0 in range(0,t1):   # t=time, t0 = 0..39 => year 1950..1990      df_train_cbind.shape = 50,104
@@ -36,8 +36,8 @@ def transformer_input_shaping(padd_train,T_encoder, T_decoder,tau0, batch_size):
             batch_idx = pattern_idx // batch_size 
             
             x[batch_idx, pattern_per_batch_idx,:,:] = padd_train.iloc[t0 : (t0 + T_encoder), a0 : (a0 + tau0)].copy()  # copy years from t0 to t9 and ages from a0 to a0+5 into xt_train [100*t0+a0, :, :]
-            y_input[batch_idx, pattern_per_batch_idx] = padd_train.iloc[(t0 + T_encoder - 1) : (t0 + T_encoder + T_decoder - 1), a0 + int(delta0)].copy()  # copy years from t9 to t13 and ages from a0 to a0+5 into xt_train [100*t0+a0, :, :]
-            y_expected[batch_idx, pattern_per_batch_idx] = padd_train.iloc[(t0 + T_encoder) : (t0 + T_encoder + T_decoder), a0 + int(delta0)].copy()  # copy years from t9 to t13 and ages from a0 to a0+5 into xt_train [100*t0+a0, :, :]
+            y_input[batch_idx, pattern_per_batch_idx, :, :] = padd_train.iloc[(t0 + T_encoder - 1) : (t0 + T_encoder + T_decoder - 1), a0 + int(delta0) : a0 + int(delta0) + num_out_features].copy()  # copy years from t9 to t13 and ages from a0 to a0+5 into xt_train [100*t0+a0, :, :]
+            y_expected[batch_idx, pattern_per_batch_idx, :, :] = padd_train.iloc[(t0 + T_encoder) : (t0 + T_encoder + T_decoder), a0 + int(delta0)  : a0 + int(delta0) + num_out_features].copy()  # copy years from t9 to t13 and ages from a0 to a0+5 into xt_train [100*t0+a0, :, :]
                 
 
 
@@ -63,18 +63,18 @@ def padding(raw_train,T,tau0):
     #print("Dataset with padding: \n",padd_train)
     return padd_train
 
-def preprocessed_data( data, gender, T , tau0, batch_size = 5):
+def preprocessed_data( data, gender, T , tau0, batch_size = 5, num_out_features = 1):
     T_encoder, T_decoder = T
     logmat = data_to_logmat(data, gender)
     padd_train= padding(logmat, T_encoder + T_decoder, tau0)
-    xe,xd, yd = transformer_input_shaping(padd_train,T_encoder, T_decoder,tau0, batch_size)
+    xe,xd, yd = transformer_input_shaping(padd_train,T_encoder, T_decoder,tau0, batch_size, num_out_features)
     return xe, xd, None, yd
 
 
-def preprocessing_with_both_genders(data, T, tau0, batch_size = 5):
+def preprocessing_with_both_genders(data, T, tau0, batch_size = 5, num_out_features = 1):
 
-    data0 = (preprocessed_data(data, 'Female', T, tau0, batch_size)) # only training data
-    data1 = (preprocessed_data(data, 'Male', T, tau0, batch_size))
+    data0 = (preprocessed_data(data, 'Female', T, tau0, batch_size, num_out_features)) # only training data
+    data1 = (preprocessed_data(data, 'Male', T, tau0, batch_size, num_out_features))
 
     d = data0[0].shape[0]
     T_encoder = T[0]
@@ -86,11 +86,11 @@ def preprocessing_with_both_genders(data, T, tau0, batch_size = 5):
     d = data0[0].shape[0]
     xe = np.empty ((2*d, batch_size, T_encoder, tau0)) #shaping
     xe[:] = np.NaN
-    xd = np.empty ((2*d, batch_size, T_decoder, tau0)) #shaping
+    xd = np.empty ((2*d, batch_size, T_decoder, num_out_features)) #shaping
     xd[:] = np.NaN
-    yd = np.empty((2*d, batch_size, T_decoder, tau0))
+    yd = np.empty((2*d, batch_size, T_decoder, num_out_features))
     yd[:] = np.NaN
-    gender_indicator = np.array([0,1] * d * batch_size)
+    gender_indicator = np.array(([0]*T_decoder+[1]*T_decoder) * d * batch_size)
     gender_indicator = np.reshape(gender_indicator, [2*d, batch_size])
 
 
