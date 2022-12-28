@@ -9,7 +9,7 @@ link: https://towardsdatascience.com/how-to-make-a-pytorch-transformer-for-time-
 """
 
 import torch.nn as nn 
-from torch import nn, Tensor, triu, ones
+from torch import nn, Tensor, triu, ones, concat
 import positional_encoder as pe
 import torch.nn.functional as F
 
@@ -30,11 +30,14 @@ class TimeSeriesTransformer(nn.Module):
         dropout_pos_enc: float = 0.1,
         dim_feedforward_encoder: int = 2048,
         dim_feedforward_decoder: int = 2048,
-        num_predicted_features: int = 1
+        num_predicted_features: int = 1,
+        both_gender_model: bool = False
         ): 
 
 
         super().__init__() 
+
+        self.both_gender_model = both_gender_model
 
         self.dec_seq_len = dec_seq_len
 
@@ -98,8 +101,17 @@ class TimeSeriesTransformer(nn.Module):
             out_features=num_predicted_features
             )
 
+        if self.both_gender_model:
+            in_linear_mapping = num_predicted_features + 1
+
+
+        self.linear_mapping = nn.Linear(
+            in_features=in_linear_mapping,
+            out_features=num_predicted_features
+            )
+
     def forward(self, src: Tensor, tgt: Tensor, src_mask: Tensor=None, 
-                tgt_mask: Tensor=None) -> Tensor:
+                tgt_mask: Tensor=None, gender_index: Tensor=None) -> Tensor:
         """
         Returns a tensor of shape:
         [target_sequence_length, batch_size, num_predicted_features]
@@ -142,10 +154,17 @@ class TimeSeriesTransformer(nn.Module):
             memory_mask=src_mask
             )
 
-        # Pass through linear mapping
-        decoder_output = self.linear_mapping(decoder_output) # shape [batch_size, target seq len]
+        output = decoder_output
 
-        return decoder_output
+        if self.both_gender_model:
+            output = concat([decoder_output, gender_index], dim = 1)
+        
+        else: 
+            output = decoder_output
+
+        output = self.linear_mapping(output) # shape [batch_size, target seq len]
+
+        return output
     
     
 def generate_square_subsequent_mask(dim1: int, dim2: int) -> Tensor:

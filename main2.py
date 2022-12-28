@@ -30,6 +30,7 @@ if __name__ == "__main__":
     split_value1 = 1989
     split_value2 = 2000
     gender = 'both'
+    both_gender_model = (gender == 'both')
     
     # Preprocessing
     data = preprocess_country_data(country, raw_filenamePT, raw_filenameSW)
@@ -43,27 +44,27 @@ if __name__ == "__main__":
     if gender == 'both':
         xe, xd, gender_idx, yd = preprocessing_with_both_genders(training_data, (T_encoder, T_decoder), tau0)
         xe, xd, gender_idx, yd  = from_numpy(xe).float(), from_numpy(xd).float(), from_numpy(gender_idx).float(), from_numpy(yd).float()
-        train_data = (xe, xd, gender_idx, yd)
 
         xe_val, xd_val, gender_idx_val, yd_val = preprocessing_with_both_genders( validation_data, (T_encoder, T_decoder), tau0)
         xe_val, xd_val, gender_idx_val, yd_val  = from_numpy(xe_val).float(), from_numpy(xd_val).float(), from_numpy(gender_idx_val).float(), from_numpy(yd_val).float()
-        val_data = (xe_val, xd_val, gender_idx_val, yd_val )
 
         xe_test, xd_test, gender_idx_test, yd_test = preprocessing_with_both_genders(test_data, (T_encoder, T_decoder), tau0)
         xe_test, xd_test, gender_idx_test, yd_test  = from_numpy(xe_test).float(), from_numpy(xd_test).float(), from_numpy(gender_idx_test).float(), from_numpy(yd_test).float()
-        test_data = (xe_test, xd_test, gender_idx_test, yd_test)
 
-"""
+
     elif gender == 'Male' or gender == 'Female' :
-        xe, xd, yd = preprocessed_data( training_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
-        xe, xd, yd  = from_numpy(xe).float(), from_numpy(xd).float(), from_numpy(yd).float()
+        xe, xd, gender_idx, yd = preprocessed_data( training_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
+        xe, xd, gender_idx, yd  = from_numpy(xe).float(), from_numpy(xd).float(), from_numpy(yd).float()
 
-        xe_val, xd_val, yd_val = preprocessed_data( validation_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
-        xe_val, xd_val, yd_val  = from_numpy(xe_val).float(), from_numpy(xd_val).float(), from_numpy(yd_val).float()
+        xe_val, xd_val, gender_idx_val, yd_val= preprocessed_data( validation_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
+        xe_val, xd_val, gender_idx_val, yd_val = from_numpy(xe_val).float(), from_numpy(xd_val).float(), from_numpy(yd_val).float()
 
-        xe_test, xd_test, yd_test = preprocessed_data(test_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
-        xe_test, xd_test, yd_test  = from_numpy(xe_test).float(), from_numpy(xd_test).float(), from_numpy(yd_test).float()
+        xe_test, xd_test, gender_idx_test, yd_test = preprocessed_data(test_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
+        xe_test, xd_test, gender_idx_test, yd_test  = from_numpy(xe_test).float(), from_numpy(xd_test).float(), from_numpy(yd_test).float()
 
+    train_data = (xe, xd, gender_idx, yd)
+    val_data = (xe_val, xd_val, gender_idx_val, yd_val )
+    test_data = (xe_test, xd_test, gender_idx_test, yd_test)
 
     
     ## Model parameters
@@ -76,7 +77,7 @@ if __name__ == "__main__":
     enc_seq_len = T_encoder # length of input given to encoder. Can have any integer value.
     output_sequence_length = 10 # Length of the target sequence, i.e. how many time steps should your forecast cover
     max_seq_len = enc_seq_len # What's the longest sequence the model will encounter? Used to make the positional encoder
-    num_predicted_features = 5
+    num_predicted_features = 1
     batch_size = 5
 
 
@@ -88,13 +89,15 @@ if __name__ == "__main__":
         n_decoder_layers=n_decoder_layers,
         n_encoder_layers=n_encoder_layers,
         n_heads=n_heads,
-        num_predicted_features=num_predicted_features)
+        num_predicted_features=num_predicted_features,
+        both_gender_model = both_gender_model
+    )
     
     # Make xe mask for decoder with size:
     tgt_mask = tst.generate_square_subsequent_mask(
         dim1 = dec_seq_len,
         dim2 = dec_seq_len
-       )
+    )
     
     xe_mask = tst.generate_square_subsequent_mask(
         dim1=dec_seq_len,
@@ -106,10 +109,9 @@ if __name__ == "__main__":
 
     lr = 0.05
     opt = optim.SGD(model.parameters(), lr = lr)
-    #opt = optim.Adam(model.parameters(), betas = (0.9, 0.98), eps = 1e-9)
     scheduler = Scheduler(opt, dim_embed = dim_val, warmup_steps = 2)
 
-    #opt = optim.SGD(model.parameters(), lr=lr)
+    #opt = optim.Adam(model.parameters(), betas = (0.9, 0.98), eps = 1e-9)
     #scheduler = optim.lr_scheduler.StepLR(opt, 1.0, gamma=0.95, )
     
     #Losses
@@ -121,14 +123,14 @@ if __name__ == "__main__":
         epoch_start_time = time.time()
         train(
         model = model, 
-        train_data = (xe, xd, yd),
+        train_data = train_data,
         src_mask = xe_mask,
         tgt_mask = tgt_mask,
         epoch = epoch, 
         optimizer = opt, 
         lr = lr,
         criterion = loss)
-        eval_data = (xe_val, xd_val, yd_val)
+        eval_data = eval_data
         val_loss = evaluate( model, eval_data, tgt_mask,  xe_mask, loss)
         val_ppl = math.exp(val_loss)
         elapsed = time.time() - epoch_start_time
@@ -144,16 +146,14 @@ if __name__ == "__main__":
         if scheduler is not None:
             scheduler.step()
 
-test_data = (xe_test, xd_test, yd_test)
 test_loss = evaluate(best_model, test_data, tgt_mask,  xe_mask, loss)
-training_data = (xe, xd, yd)
-training_loss = evaluate(best_model, training_data, tgt_mask,  xe_mask, loss)
+training_loss = evaluate(best_model, train_data, tgt_mask,  xe_mask, loss)
 
 print('=' * 89)
 print('| End of training | training loss {:5.2f} | test loss {:5.2f} | test ppl {:8.2f}'.format(
     training_loss, test_loss, math.exp(test_loss)))
 print('=' * 89)
 
-    """
+
 
     
