@@ -36,8 +36,8 @@ class MortalityRateTransformer(nn.Module):
         d_model: int = 512,  
         n_encoder_layers: int = 4,
         n_decoder_layers: int = 4,
-        T_encoder: int = 3,
-        T_decoder: int = 7,
+        T_encoder: int = 7,
+        T_decoder: int = 3,
         dropout_encoder: float = 0.2, 
         dropout_decoder: float = 0.2,
         dropout_pos_enc: float = 0.1,
@@ -154,30 +154,24 @@ class MortalityRateTransformer(nn.Module):
         """
 
 
-        # Pass throguh the input layer right before the encoder
-        src = self.encoder_input_layer(src) # src shape: [batch_size, src length, d_model] regardless of number of input features
+        encoder_input = self.encoder_input_layer( src ) 
 
-        # Pass through the positional encoding layer
-        src = self.positional_encoding_layer_enc(src) # src shape: [batch_size, src length, d_model] regardless of number of input features
+        encoder_input = self.positional_encoding_layer_enc( encoder_input ) 
 
-        # Pass through all the stacked encoder layers in the encoder
-        src = self.encoder( # src shape: [batch_size, enc_seq_len, d_model]
-            src=src
-            )
+        encoder_output = self.encoder( src = encoder_input ) # src shape: [batch_size, enc_seq_len, d_model]
 
-        
-        tgt = self.positional_encoding_layer_dec(tgt) # src shape: [batch_size, src length, d_model] regardless of number of input features
+            
+        decoder_input = self.decoder_input_layer( tgt ) # src shape: [target sequence length, batch_size, d_model] regardless of number of input features
 
-        # Pass decoder input through decoder input layer
-        decoder_output = self.decoder_input_layer(tgt) # src shape: [target sequence length, batch_size, d_model] regardless of number of input features
+        decoder_input = self.positional_encoding_layer_dec( decoder_input ) # src shape: [batch_size, src length, d_model] regardless of number of input features
 
-        # Pass throguh decoder - output shape: [batch_size, target seq len, d_model]
+
         decoder_output = self.decoder(
-            tgt=decoder_output,
-            memory=src,
+            tgt=decoder_input,
+            memory=encoder_output,
             tgt_mask=tgt_mask,
             memory_mask=src_mask
-            )
+            ) # output shape: [batch_size, target seq len, d_model]
 
         output = decoder_output
 
@@ -199,7 +193,7 @@ def generate_square_subsequent_mask(dim1: int, dim2: int) -> Tensor:
 
     Source:
     https://pytorch.org/tutorials/beginner/transformer_tutorial.html
-    
+
     Args:
         dim1: int, for both src and tgt masking, this must be target sequence
               length
