@@ -30,6 +30,7 @@ if __name__ == "__main__":
     gender = 'both'
     both_gender_model = (gender == 'both')
 
+
     # Model hyperparameters  
     input_size = 5
     batch_first = True
@@ -47,6 +48,7 @@ if __name__ == "__main__":
     dim_feedforward_decoder = 2048
     num_predicted_features = 1
     
+
     # Preprocessing
     data = preprocess_country_data(country, raw_filenamePT, raw_filenameSW)
     
@@ -59,8 +61,6 @@ if __name__ == "__main__":
     if gender == 'both':
         xe, xd, gender_idx, yd = prt.preprocessing_with_both_genders(training_data, (T_encoder, T_decoder), tau0)
         xe, xd, gender_idx, yd  = from_numpy(xe).float(), from_numpy(xd).float(), from_numpy(gender_idx).float(), from_numpy(yd).float()
-
-        # train_data = from_numpy(x).float() for x in train_data
 
         xe_val, xd_val, gender_idx_val, yd_val = prt.preprocessing_with_both_genders( validation_data, (T_encoder, T_decoder), tau0)
         xe_val, xd_val, gender_idx_val, yd_val  = from_numpy(xe_val).float(), from_numpy(xd_val).float(), from_numpy(gender_idx_val).float(), from_numpy(yd_val).float()
@@ -82,7 +82,6 @@ if __name__ == "__main__":
     train_data = (xe, xd, gender_idx, yd)
     val_data = (xe_val, xd_val, gender_idx_val, yd_val )
     test_data = (xe_test, xd_test, gender_idx_test, yd_test)
-
 
     model = mrt.MortalityRateTransformer(
         input_size = input_size,
@@ -113,52 +112,7 @@ if __name__ == "__main__":
         dim2 = T_encoder
     )
 
-
-    """
-    # Defining loss function and optimizer
-    loss = nn.MSELoss()
-    lr = 0.05
-    opt = optim.SGD(model.parameters(), lr = lr)
-    scheduler = Scheduler(opt, dim_embed = d_model, warmup_steps = 2)
-
-    #opt = optim.Adam(model.parameters(), betas = (0.9, 0.98), eps = 1e-9)
-    #scheduler = optim.lr_scheduler.StepLR(opt, 1.0, gamma=0.95, )
-
-    
-    # Losses
-    best_val_loss = float('inf')
-    epochs = 5
-    best_model = None
-
-    
-    for epoch in range(1, epochs + 1):
-        epoch_start_time = time.time()
-        trt.train(
-        model = model, 
-        train_data = train_data,
-        src_mask = xe_mask,
-        tgt_mask = tgt_mask,
-        epoch = epoch, 
-        optimizer = opt, 
-        lr = lr,
-        criterion = loss)
-        eval_data = eval_data
-        val_loss = trt.evaluate( model, eval_data, tgt_mask,  xe_mask, loss)
-        val_ppl = math.exp(val_loss)
-        elapsed = time.time() - epoch_start_time
-        print('-' * 89)
-        print(f'| end of epoch {epoch:3d} | time: {elapsed:5.2f}s | '
-            f'valid loss {val_loss:5.2f}')
-        print('-' * 89)
-
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            best_model = copy.deepcopy(model)
-
-        if scheduler is not None:
-            scheduler.step() """
-
-    # Training hyperparameters
+# Training hyperparameters
     criterion = nn.MSELoss()
     lr = 0.05
     opt = optim.SGD(model.parameters(), lr = lr)
@@ -181,8 +135,8 @@ if __name__ == "__main__":
      )
 
 
-    test_loss = trt.evaluate(best_model, test_data, tgt_mask,  xe_mask, loss)
-    training_loss = trt.evaluate(best_model, train_data, tgt_mask,  xe_mask, loss)
+    test_loss = trt.evaluate(best_model, test_data, tgt_mask,  xe_mask, criterion)
+    training_loss = trt.evaluate(best_model, train_data, tgt_mask,  xe_mask, criterion)
 
     print('=' * 89)
     print('| End of training | training loss {:5.2f} | test loss {:5.2f} | test ppl {:8.2f}'.format(
