@@ -60,6 +60,8 @@ if __name__ == "__main__":
         xe, xd, gender_idx, yd = prt.preprocessing_with_both_genders(training_data, (T_encoder, T_decoder), tau0)
         xe, xd, gender_idx, yd  = from_numpy(xe).float(), from_numpy(xd).float(), from_numpy(gender_idx).float(), from_numpy(yd).float()
 
+        # train_data = from_numpy(x).float() for x in train_data
+
         xe_val, xd_val, gender_idx_val, yd_val = prt.preprocessing_with_both_genders( validation_data, (T_encoder, T_decoder), tau0)
         xe_val, xd_val, gender_idx_val, yd_val  = from_numpy(xe_val).float(), from_numpy(xd_val).float(), from_numpy(gender_idx_val).float(), from_numpy(yd_val).float()
 

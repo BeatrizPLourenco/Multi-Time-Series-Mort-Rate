@@ -119,7 +119,7 @@ def evaluate(
         for batch_nb in range(num_batches):
             x_val, y_val_input, gender_idx, y_val_expected = get_batch(data, batch_nb)
             seq_len = x_val.size(1)
-            if seq_len != bptt:
+            if seq_len != batch_size:
                 xe_mask = xe_mask[:seq_len, :seq_len]
             output = model(x_val, y_val_input, gender_idx , xe_mask, tgt_mask)
             total_loss += seq_len * criterion(output, y_val_expected).item()
