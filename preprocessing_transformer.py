@@ -8,13 +8,25 @@ Created on Sat Oct 15 09:30:54 2022
 
 import numpy as np
 import pandas as pd
+import torch
 from torch import Tensor, device, cuda
 
 device = device('cuda' if cuda.is_available() else 'cpu')
 
+def from_numpy_to_torch(t: tuple) -> tuple:
+    """Transformer tuple of Numpy arrays to tuple of torch arrays.
+
+    Args:
+        t (tuple): tuple of numpy arrays to convert.
+    
+    Returns:
+        Tuple of torch tensors.
+    """
+    return tuple(map(lambda x: torch.from_numpy(x).float(), t))
+
+
 
 def transformer_input_shaping(padd_train,T_encoder, T_decoder,tau0, batch_size, num_out_features):
-    map = {'female' : 0, 'male' : 1}
 
     t1 = padd_train.shape[0]-(T_encoder + T_decoder-1)-1
     a1 = padd_train.shape[1]-(tau0-1)
@@ -71,8 +83,8 @@ def preprocessed_data( data, gender, T , tau0, batch_size = 5, num_out_features 
     return xe, xd, None, yd
 
 
-def preprocessing_with_both_genders(data, T, tau0, batch_size = 5, num_out_features = 1):
-
+def preprocessing_with_both_genders(data, gender, T, tau0, batch_size = 5, num_out_features = 1):
+    
     data0 = (preprocessed_data(data, 'Female', T, tau0, batch_size, num_out_features)) # only training data
     data1 = (preprocessed_data(data, 'Male', T, tau0, batch_size, num_out_features))
 

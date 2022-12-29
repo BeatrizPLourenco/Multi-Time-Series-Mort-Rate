@@ -6,13 +6,13 @@ Created on Fri Oct 14 18:23:31 2022
 @author: beatrizlourenco
 """
 
-from data_cleaning import preprocess_country_data, split_data
+import data_cleaning as dtclean
 import preprocessing_transformer as prt
 import train_transformer as trt
 from scheduler import Scheduler
 import mortalityRateTransformer as mrt
-from torch import from_numpy, nn, optim
-import math, time, copy
+from torch import nn, optim
+import math
 
 if __name__ == "__main__":
     
@@ -50,39 +50,28 @@ if __name__ == "__main__":
     
 
     # Preprocessing
-    data = preprocess_country_data(country, raw_filenamePT, raw_filenameSW)
+    data = dtclean.get_country_data(country)
     
     # Split Data
-    training_data, validation_test_data  = split_data(data, split_value1)
-    validation_data, test_data  = split_data(validation_test_data, split_value2)    
-
+    training_data, validation_test_data  = dtclean.split_data(data, split_value1)
+    validation_data, test_data  = dtclean.split_data(validation_test_data, split_value2)    
     
     # preprocessing for the transformer
     if gender == 'both':
-        xe, xd, gender_idx, yd = prt.preprocessing_with_both_genders(training_data, (T_encoder, T_decoder), tau0)
-        xe, xd, gender_idx, yd  = from_numpy(xe).float(), from_numpy(xd).float(), from_numpy(gender_idx).float(), from_numpy(yd).float()
-
-        xe_val, xd_val, gender_idx_val, yd_val = prt.preprocessing_with_both_genders( validation_data, (T_encoder, T_decoder), tau0)
-        xe_val, xd_val, gender_idx_val, yd_val  = from_numpy(xe_val).float(), from_numpy(xd_val).float(), from_numpy(gender_idx_val).float(), from_numpy(yd_val).float()
-
-        xe_test, xd_test, gender_idx_test, yd_test = prt.preprocessing_with_both_genders(test_data, (T_encoder, T_decoder), tau0)
-        xe_test, xd_test, gender_idx_test, yd_test  = from_numpy(xe_test).float(), from_numpy(xd_test).float(), from_numpy(gender_idx_test).float(), from_numpy(yd_test).float()
+        train_data = prt.preprocessing_with_both_genders(training_data, (T_encoder, T_decoder), tau0)
+        val_data  = prt.preprocessing_with_both_genders(validation_data, (T_encoder, T_decoder), tau0)
+        test_data = prt.preprocessing_with_both_genders(test_data, (T_encoder, T_decoder), tau0)
 
 
     elif gender == 'Male' or gender == 'Female' :
-        xe, xd, gender_idx, yd = prt.preprocessed_data( training_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
-        xe, xd, gender_idx, yd  = from_numpy(xe).float(), from_numpy(xd).float(), from_numpy(yd).float()
+        train_data = prt.preprocessed_data( training_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
+        val_data = prt.preprocessed_data( validation_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
+        test_data = prt.preprocessed_data(test_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
 
-        xe_val, xd_val, gender_idx_val, yd_val= prt.preprocessed_data( validation_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
-        xe_val, xd_val, gender_idx_val, yd_val = from_numpy(xe_val).float(), from_numpy(xd_val).float(), from_numpy(yd_val).float()
 
-        xe_test, xd_test, gender_idx_test, yd_test = prt.preprocessed_data(test_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
-        xe_test, xd_test, gender_idx_test, yd_test  = from_numpy(xe_test).float(), from_numpy(xd_test).float(), from_numpy(yd_test).float()
+    train_data, val_data, test_data = prt.from_numpy_to_torch(train_data), prt.from_numpy_to_torch(val_data), prt.from_numpy_to_torch(test_data)
 
-    train_data = (xe, xd, gender_idx, yd)
-    val_data = (xe_val, xd_val, gender_idx_val, yd_val )
-    test_data = (xe_test, xd_test, gender_idx_test, yd_test)
-
+    # Initializing model object
     model = mrt.MortalityRateTransformer(
         input_size = input_size,
         batch_first = batch_first,
@@ -101,7 +90,7 @@ if __name__ == "__main__":
         both_gender_model = both_gender_model
     )
     
-    # Make xe mask for decoder with size:
+    # Masking the encoder output and decoder input for decoder:
     tgt_mask = mrt.generate_square_subsequent_mask(
         dim1 = T_decoder,
         dim2 = T_decoder
@@ -112,7 +101,7 @@ if __name__ == "__main__":
         dim2 = T_encoder
     )
 
-# Training hyperparameters
+    # Training hyperparameters
     criterion = nn.MSELoss()
     lr = 0.05
     opt = optim.SGD(model.parameters(), lr = lr)
@@ -134,7 +123,7 @@ if __name__ == "__main__":
         scheduler = scheduler
      )
 
-
+    # Evaluation
     test_loss = trt.evaluate(best_model, test_data, tgt_mask,  xe_mask, criterion)
     training_loss = trt.evaluate(best_model, train_data, tgt_mask,  xe_mask, criterion)
 
