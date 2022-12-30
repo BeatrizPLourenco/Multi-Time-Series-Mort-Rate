@@ -51,7 +51,7 @@ def save_ckp(state: dict, is_best: bool, checkpoint_dir: str = 'Saved_models', b
         best_fpath = best_model_dir + '/best_model.pt'
         shutil.copyfile(f_path, best_fpath)
 
-def load_ckp( model, optimizer, checkpoint_dir: str = 'Saved_models') -> None:
+def load_ckp( model, optimizer, scheduler, checkpoint_dir: str = 'Saved_models') -> None:
     """ Loads the latest checkpoint into the model and the optimizer.
 
     Args: 
@@ -64,8 +64,9 @@ def load_ckp( model, optimizer, checkpoint_dir: str = 'Saved_models') -> None:
     checkpoint = torch.load(checkpoint_fpath)
     model.load_state_dict(checkpoint['state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer'])
+    scheduler.load_state_dict(checkpoint['scheduler'])
 
-    return model, optimizer, checkpoint['epoch'], checkpoint['train_loss_history'], checkpoint['val_loss_history'], checkpoint['lr_history']
+    return model, optimizer,scheduler, checkpoint['epoch'], checkpoint['train_loss_history'], checkpoint['val_loss_history'], checkpoint['lr_history']
 
 def load_best_model(best_model_dir: str = 'Saved_models'):
     """Loads the best model from the disk.
@@ -154,7 +155,6 @@ def train(
             total_loss = 0
             start_time = time.time()
     
-    {'loss' : cur_loss, 'lr': last_lr}
     return {'loss' : cur_loss, 'lr': last_lr}
 
 
@@ -238,7 +238,7 @@ def fit(
     val_loss_history = [float('inf')]
 
     if resume_training:
-        model, opt, start_epoch, train_loss_history, val_loss_history, lr_history = load_ckp( model, opt)
+        model, opt, scheduler, start_epoch, train_loss_history, val_loss_history, lr_history = load_ckp( model, opt, scheduler)
 
     best_model = model
     last_val_loss = val_loss_history[-1]
@@ -276,6 +276,7 @@ def fit(
             'epoch': epoch + 1,
             'state_dict': model.state_dict(),
             'optimizer': opt.state_dict(),
+            'scheduler': scheduler.state_dict(),
             'train_loss_history': train_loss_history,
             'val_loss_history': val_loss_history,
             'lr_history': lr_history

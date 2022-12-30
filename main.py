@@ -107,8 +107,9 @@ if __name__ == "__main__":
     # Training hyperparameters
     criterion = nn.MSELoss()
     opt = optim.SGD(model.parameters(), lr = 0.005)
-    scheduler = Scheduler(opt, dim_embed = d_model, warmup_steps = 50)
-    epochs = 2
+    scheduler = optim.lr_scheduler.StepLR(opt, step_size = 30, gamma = 0.1)
+    #scheduler = Scheduler(opt, dim_embed = d_model, warmup_steps = 50)
+    epochs = 100
 
     # Training
     best_model, history = trt.fit(
