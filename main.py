@@ -17,7 +17,7 @@ import math
 if __name__ == "__main__":
 
     # training
-    resume_training = False
+    resume_training = True
     
     # Control
     country = "PT"
@@ -106,10 +106,9 @@ if __name__ == "__main__":
 
     # Training hyperparameters
     criterion = nn.MSELoss()
-    lr = 0.05
     opt = optim.SGD(model.parameters(), lr = 0.005)
     scheduler = Scheduler(opt, dim_embed = d_model, warmup_steps = 50)
-    epochs = 4
+    epochs = 2
 
     # Training
     best_model, history = trt.fit(
@@ -129,11 +128,11 @@ if __name__ == "__main__":
     trt.save_plots(history['train_loss_history'], history['val_loss_history'])
 
     # Evaluation
-    test_loss = trt.evaluate(best_model, test_data, tgt_mask,  xe_mask, criterion)
+    test_loss = trt.evaluate(best_model, batch_size, test_data, tgt_mask,  xe_mask, criterion)
 
     print('=' * 89)
     print('| End of training | training loss {:5.2f} | validation loss {:5.2f} | test loss {:5.2f} | test ppl {:8.2f}'.format(
-        history['train_loss_history'], history['val_loss_history'], test_loss, math.exp(test_loss)))
+        history['train_loss_history'][-1], history['val_loss_history'][-1], test_loss, math.exp(test_loss)))
     print('=' * 89)
 
 

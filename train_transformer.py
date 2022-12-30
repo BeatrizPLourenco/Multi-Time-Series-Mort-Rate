@@ -240,6 +240,7 @@ def fit(
     if resume_training:
         model, opt, start_epoch, train_loss_history, val_loss_history, lr_history = load_ckp( model, opt)
 
+    best_model = model
     last_val_loss = val_loss_history[-1]
 
     for epoch in range(start_epoch, epochs + 1):
