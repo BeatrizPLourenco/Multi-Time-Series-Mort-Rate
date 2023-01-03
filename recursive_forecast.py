@@ -4,7 +4,7 @@ import preprocessing_transformer as prt
 import torch
 
 
-def recursive_forecast_both_genders(raw_data, first_year,last_year, T, tau0, model, enc_out_mask, dec_in_mask, gender = 'Both'):
+def recursive_forecast_both_genders(raw_data, first_year,last_year, T, tau0,xmin, xmax, model, enc_out_mask, dec_in_mask, gender = 'Both'):
     ObsYear = 1999 #last obs year
 
     timerange = T[0] + T[1]
@@ -14,7 +14,7 @@ def recursive_forecast_both_genders(raw_data, first_year,last_year, T, tau0, mod
 
     for  year in range(ObsYear+1, last_year+1): # The next year is recursively predicted 
         mort = mortality[( mortality['Year'] >= (year-timerange-1))].copy() #selection of only the last T years
-        xe, xd, ind, yd = prt.preprocessing_with_both_genders(mort, T, tau0, 1) 
+        xe, xd, ind, yd = prt.preprocessing_with_both_genders(mort, T, tau0, xmin, xmax, 1) 
 
         l=[]
         for i in range(0,100):

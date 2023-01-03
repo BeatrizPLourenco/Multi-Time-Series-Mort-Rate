@@ -13,6 +13,16 @@ from torch import Tensor, device, cuda
 
 device = device('cuda' if cuda.is_available() else 'cpu')
 
+def min_max_from_dataframe(data: pd.DataFrame):
+    xmin = data.to_numpy().min()
+    xmax = data.to_numpy().max()
+    return xmin, xmax
+
+def minMaxScale(data_to_normalize, xmin, xmax):
+  x_norm = 2*(data_to_normalize-xmin)/(xmin-xmax)-1
+
+  return x_norm
+
 def from_numpy_to_torch(t: tuple) -> tuple:
     """Transformer tuple of Numpy arrays to tuple of torch arrays.
 
@@ -57,8 +67,10 @@ def transformer_input_shaping(padd_train,T_encoder, T_decoder,tau0, batch_size, 
 
 
 
-def data_to_logmat(raw_data, gender):    
-    logmat_gender = raw_data.loc[raw_data['Gender'] == gender].copy()
+def data_to_logmat(raw_data, gender = 'both'):   
+    logmat_gender = raw_data
+    if gender != 'both':
+        logmat_gender = raw_data.loc[raw_data['Gender'] == gender].copy()
     logmat_gender = logmat_gender[['Year', 'Age', 'logmx']].copy()
     logmat_gender = pd.crosstab(logmat_gender['Year'], logmat_gender['Age'], logmat_gender['logmx'],aggfunc='sum')
     return logmat_gender
@@ -75,18 +87,21 @@ def padding(raw_train,T,tau0):
     #print("Dataset with padding: \n",padd_train)
     return padd_train
 
-def preprocessed_data( data: Tensor, gender, T , tau0, batch_size = 5, num_out_features = 1):
+def preprocessed_data( data: Tensor, gender, T , tau0, xmin, xmax, batch_size = 5, num_out_features = 1):
     T_encoder, T_decoder = T
     logmat = data_to_logmat(data, gender)
     padd_train= padding(logmat, T_encoder + T_decoder, tau0)
     xe,xd, yd = transformer_input_shaping(padd_train,T_encoder, T_decoder,tau0, batch_size, num_out_features)
+    xe = minMaxScale(xe, xmin, xmax)
+    xd = minMaxScale(xd, xmin, xmax)
+    yd = -yd
     return xe, xd, None, yd
 
 
-def preprocessing_with_both_genders(data, T, tau0, batch_size = 5, num_out_features = 1):
+def preprocessing_with_both_genders(data, T, tau0,xmin, xmax, batch_size = 5, num_out_features = 1):
     
-    data0 = (preprocessed_data(data, 'Female', T, tau0, batch_size, num_out_features)) # only training data
-    data1 = (preprocessed_data(data, 'Male', T, tau0, batch_size, num_out_features))
+    data0 = (preprocessed_data(data, 'Female', T, tau0,xmin, xmax, batch_size, num_out_features)) # only training data
+    data1 = (preprocessed_data(data, 'Male', T, tau0,xmin, xmax, batch_size, num_out_features))
 
     d = data0[0].shape[0]
     T_encoder = T[0]

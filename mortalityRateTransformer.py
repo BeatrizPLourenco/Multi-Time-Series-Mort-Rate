@@ -9,6 +9,7 @@ link: https://towardsdatascience.com/how-to-make-a-pytorch-transformer-for-time-
 """
 
 import torch.nn as nn 
+import torch
 from torch import nn, Tensor, triu, ones, concat
 import positional_encoder as pe
 import torch.nn.functional as F
@@ -128,11 +129,14 @@ class MortalityRateTransformer(nn.Module):
             in_features = d_model,
             out_features = num_predicted_features
             )
+        
 
         self.linear_mapping_with_gender_ind = nn.Linear(
             in_features = d_model + 1,
             out_features = num_predicted_features
             )
+        
+
 
     def forward(self, 
                 src: Tensor, 
@@ -172,10 +176,11 @@ class MortalityRateTransformer(nn.Module):
 
         else: 
             output = decoder_output
-            output = self.linear_mapping(output) # shape [batch_size, target seq len]
+            output = self.linear(output) # shape [batch_size, target seq len]
 
 
-        return output
+
+        return torch.exp(output)
     
     
 def generate_square_subsequent_mask(dim1: int, dim2: int) -> Tensor:
