@@ -51,31 +51,46 @@ def save_ckp(state: dict, is_best: bool, checkpoint_dir: str = 'Saved_models', b
         best_fpath = best_model_dir + '/best_model.pt'
         shutil.copyfile(f_path, best_fpath)
 
+
 def load_ckp( model, optimizer, scheduler, checkpoint_dir: str = 'Saved_models') -> None:
     """ Loads the latest checkpoint into the model and the optimizer.
 
     Args: 
         model: nn.Module to substitute the current state.
         optimizer: optimizer to substitute the current state.
-        checkpoint_dir: directory to save the checkpoint.
-    """
+        checkpoint_dir: directory to save the checkpoint."""
+    
 
     checkpoint_fpath = checkpoint_dir + '/checkpoint.pt'
     checkpoint = torch.load(checkpoint_fpath)
     model.load_state_dict(checkpoint['state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer'])
     scheduler.load_state_dict(checkpoint['scheduler'])
+    checkpoint_history = checkpoint['history']
+    epoch = checkpoint['epoch']
 
-    return model, optimizer,scheduler, checkpoint['epoch'], checkpoint['train_loss_history'], checkpoint['val_loss_history'], checkpoint['lr_history']
+    return epoch, model, optimizer, scheduler, checkpoint_history
 
-def load_best_model(best_model_dir: str = 'Saved_models'):
+
+
+
+def load_best_model(model, best_model_dir: str = 'Saved_models'):
     """Loads the best model from the disk.
 
     Args:
         best_model_dir: folder location of the best model. The file name most be '/best_model.pt'.
+
+    Returns:
+        model: model with uploaded weigths.
+        checkpoint_history: dictonary with training_loss_history, val_loss_history, lr_history
     """
 
-    return torch.load(best_model_dir + '/best_model.pt')
+    checkpoint_fpath = best_model_dir + '/best_model.pt'
+    checkpoint = torch.load(checkpoint_fpath)
+    model.load_state_dict(checkpoint['state_dict'])
+    #checkpoint_history = checkpoint['history'] TIRAR ISTO
+
+    return model, checkpoint
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -238,7 +253,9 @@ def fit(
     val_loss_history = [float('inf')]
 
     if resume_training:
-        model, opt, scheduler, start_epoch, train_loss_history, val_loss_history, lr_history = load_ckp( model, opt, scheduler)
+
+        start_epoch, model, opt, scheduler, checkpoint_history = load_ckp( model, opt, scheduler)
+        train_loss_history, val_loss_history, lr_history = checkpoint_history['train_loss_history'], checkpoint_history['val_loss_history'], checkpoint_history['lr_history']
 
     best_model = model
     last_val_loss = val_loss_history[-1]
@@ -277,9 +294,9 @@ def fit(
             'state_dict': model.state_dict(),
             'optimizer': opt.state_dict(),
             'scheduler': scheduler.state_dict(),
-            'train_loss_history': train_loss_history,
-            'val_loss_history': val_loss_history,
-            'lr_history': lr_history
+            'history': {'train_loss_history': train_loss_history,
+                'val_loss_history': val_loss_history,
+                'lr_history': lr_history}
             }
 
         save_ckp(checkpoint, is_best)

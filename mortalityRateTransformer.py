@@ -134,7 +134,8 @@ class MortalityRateTransformer(nn.Module):
             out_features = num_predicted_features
             )
 
-    def forward(self, src: Tensor, 
+    def forward(self, 
+                src: Tensor, 
                 tgt: Tensor, 
                 gender_index: Tensor=None,
                 enc_out_mask: Tensor=None, 

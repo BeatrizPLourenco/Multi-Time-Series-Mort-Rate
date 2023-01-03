@@ -75,7 +75,7 @@ def padding(raw_train,T,tau0):
     #print("Dataset with padding: \n",padd_train)
     return padd_train
 
-def preprocessed_data( data, gender, T , tau0, batch_size = 5, num_out_features = 1):
+def preprocessed_data( data: Tensor, gender, T , tau0, batch_size = 5, num_out_features = 1):
     T_encoder, T_decoder = T
     logmat = data_to_logmat(data, gender)
     padd_train= padding(logmat, T_encoder + T_decoder, tau0)

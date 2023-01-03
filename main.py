@@ -12,12 +12,19 @@ import train_transformer as trt
 from scheduler import Scheduler
 import mortalityRateTransformer as mrt
 from torch import nn, optim
+import recursive_forecast as rf
 import math
 
 if __name__ == "__main__":
 
     # training
-    resume_training = True
+    training_mode = False
+    resume_training = False
+
+    # Check for control logic inconsistency 
+    if not training_mode:
+        assert not resume_training
+     
     
     # Control
     country = "PT"
@@ -57,19 +64,19 @@ if __name__ == "__main__":
     
     # Split Data
     training_data, validation_test_data  = dtclean.split_data(data, split_value1)
-    validation_data, test_data  = dtclean.split_data(validation_test_data, split_value2)    
+    validation_data, testing_data  = dtclean.split_data(validation_test_data, split_value2)    
     
     # preprocessing for the transformer
     if gender == 'both':
-        train_data = prt.preprocessing_with_both_genders(training_data, (T_encoder, T_decoder), tau0)
-        val_data  = prt.preprocessing_with_both_genders(validation_data, (T_encoder, T_decoder), tau0)
-        test_data = prt.preprocessing_with_both_genders(test_data, (T_encoder, T_decoder), tau0)
+        train_data = prt.preprocessing_with_both_genders(training_data, (T_encoder, T_decoder), tau0, batch_size)
+        val_data  = prt.preprocessing_with_both_genders(validation_data,  (T_encoder, T_decoder), tau0, batch_size)
+        test_data = prt.preprocessing_with_both_genders(testing_data,  (T_encoder, T_decoder), tau0, batch_size)
 
 
     elif gender == 'Male' or gender == 'Female' :
-        train_data = prt.preprocessed_data( training_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
-        val_data = prt.preprocessed_data( validation_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
-        test_data = prt.preprocessed_data(test_data, gender, (T_encoder, T_decoder), tau0, model = "transformer")
+        train_data = prt.preprocessed_data( training_data,  gender, (T_encoder, T_decoder), tau0, batch_size)
+        val_data = prt.preprocessed_data( validation_data, gender, (T_encoder, T_decoder), tau0, batch_size)
+        test_data = prt.preprocessed_data(testing_data, gender,  (T_encoder, T_decoder), tau0, batch_size)
 
 
     train_data, val_data, test_data = prt.from_numpy_to_torch(train_data), prt.from_numpy_to_torch(val_data), prt.from_numpy_to_torch(test_data)
@@ -109,22 +116,38 @@ if __name__ == "__main__":
     opt = optim.SGD(model.parameters(), lr = 0.005)
     scheduler = optim.lr_scheduler.StepLR(opt, step_size = 30, gamma = 0.1)
     #scheduler = Scheduler(opt, dim_embed = d_model, warmup_steps = 50)
-    epochs = 100
+    epochs = 1
 
     # Training
-    best_model, history = trt.fit(
-        model = model,
-        batch_size = batch_size,
-        epochs = epochs,
-        train_data = train_data,
-        val_data = val_data,
-        xe_mask = xe_mask,
-        tgt_mask = tgt_mask,
-        opt = opt, 
-        criterion = criterion, 
-        scheduler = scheduler,
-        resume_training = resume_training
-     )
+    if training_mode == True:
+        best_model, history = trt.fit(
+            model = model,
+            batch_size = batch_size,
+            epochs = epochs,
+            train_data = train_data,
+            val_data = val_data,
+            xe_mask = xe_mask,
+            tgt_mask = tgt_mask,
+            opt = opt, 
+            criterion = criterion, 
+            scheduler = scheduler,
+            resume_training = resume_training
+        )
+    else:
+        best_model, history = trt.load_best_model(model)
+    
+    first_year, last_year = 2000, 2020
+
+    ######## IMPROVE THIS SLICE
+    import numpy as np
+    from sklearn.metrics import mean_squared_error
+    real_test_male = (testing_data[testing_data['Gender'] == 'Male']).copy()['mx']
+    real_test_female = (testing_data[testing_data['Gender'] == 'Female']).copy()['mx']
+    recursive_prediction_male = rf.recursive_forecast_both_genders(data, first_year,last_year, (T_encoder, T_decoder), tau0, model, xe_mask, tgt_mask, gender = 'Male')
+    recursive_prediction_loss_male = np.round(mean_squared_error(real_test_male.to_numpy(),recursive_prediction_male['mx'].to_numpy())*10**4,3)
+    recursive_prediction_female = rf.recursive_forecast_both_genders(data, first_year,last_year, (T_encoder, T_decoder), tau0, model, xe_mask, tgt_mask, gender = 'Male')
+    recursive_prediction_loss_female = np.round(mean_squared_error(real_test_male.to_numpy(),recursive_prediction_female['mx'].to_numpy())*10**4,3)
+    #########
 
     trt.save_plots(history['train_loss_history'], history['val_loss_history'])
 
@@ -134,6 +157,8 @@ if __name__ == "__main__":
     print('=' * 89)
     print('| End of training | training loss {:5.2f} | validation loss {:5.2f} | test loss {:5.2f} | test ppl {:8.2f}'.format(
         history['train_loss_history'][-1], history['val_loss_history'][-1], test_loss, math.exp(test_loss)))
+    print('-' * 89)
+    print('| Evaluating 20 years of recursive data | Male loss {:5.2f} | Female loss {:5.2f} '.format(recursive_prediction_loss_male,recursive_prediction_loss_female))
     print('=' * 89)
 
 
