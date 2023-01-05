@@ -13,14 +13,14 @@ import mortalityRateTransformer as mrt
 from torch import nn, optim
 import recursive_forecast as rf
 import math
-import warnings
-warnings.filterwarnings('ignore')
+#import warnings
+#warnings.filterwarnings('ignore')
 
 if __name__ == "__main__":
 
     # training
     training_mode = True
-    resume_training = True
+    resume_training = False
 
     # Check for control logic inconsistency 
     if not training_mode:
@@ -46,19 +46,19 @@ if __name__ == "__main__":
     input_size = 5
     batch_first = True
     batch_size = 5
-    d_model = 512
-    n_decoder_layers = 4 
-    n_encoder_layers = 4
-    n_heads = 8
+    d_model = 16
+    n_decoder_layers = 2
+    n_encoder_layers = 2
+    n_heads = 4
     T_encoder = 7
     T_decoder = 3
     dropout_encoder = 0.2 
     dropout_decoder = 0.2
     dropout_pos_enc = 0.1
-    dim_feedforward_encoder = 2048
-    dim_feedforward_decoder = 2048
+    dim_feedforward_encoder = 64
+    dim_feedforward_decoder = 64
     num_predicted_features = 1
-    
+
 
     # Preprocessing
     data = dtclean.get_country_data(country)
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     #opt = optim.SGD(model.parameters(), lr = 0.05)
     opt = optim.Adam(model.parameters(), lr=0.001, betas = (0.9,0.98), eps =10**(-9))
     #scheduler = optim.lr_scheduler.StepLR(opt, step_size = 500, gamma = 0.99)
-    scheduler = Scheduler(opt, dim_embed = d_model, warmup_steps = 2000)
+    scheduler = Scheduler(opt, dim_embed = d_model, warmup_steps = 4000)
     epochs = 1
 
     # Training

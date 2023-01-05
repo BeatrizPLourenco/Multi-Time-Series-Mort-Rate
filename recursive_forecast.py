@@ -16,11 +16,11 @@ def get_data_in_time_range(data: pd.DataFrame, first_year: int = None, last_year
         new_data = data[(data['Year'] <= last_year)].copy()
 
     elif last_year == None: 
-        new_data = data[(data['Year'] <= first_year)].copy()
+        new_data = data[(data['Year'] >= first_year)].copy()
 
     return new_data
 
-def get_mortality_dict_shell( 
+def get_mortality_dataframe_shell( 
     year,
     gender_idx,
     model_pred_mx,
@@ -28,8 +28,8 @@ def get_mortality_dict_shell(
     age_width: tuple = (0,100),
     sort_age: bool = True):
     
-    age_range = range(age_width)
-    nb_genders = len(set(gender_idx))
+    age_range = range(age_width[0], age_width[1])
+    nb_genders = len(gender_idx.unique())
 
     age_list = list(age_range) * nb_genders
     if sort_age: age_list.sort()
@@ -39,7 +39,7 @@ def get_mortality_dict_shell(
     model_pred_mx_list = model_pred_mx.tolist()
     model_pred_logmx_list = model_pred_logmx.tolist()
 
-    return { 'Year': year_list, 'Age': age_list, 'Gender': gender_list, 'mx': model_pred_mx_list, 'logmx': model_pred_logmx_list }
+    return pd.DataFrame({ 'Year': year_list, 'Age': age_list, 'Gender': gender_list, 'mx': model_pred_mx_list, 'logmx': model_pred_logmx_list })
 
 def recursive_forecast(
     raw_data: pd.DataFrame, 
@@ -70,16 +70,15 @@ def recursive_forecast(
 
         # Construction of prediction table for the test set:
         model_forward = model(xe, xd, ind, enc_out_mask, dec_in_mask) #prediction of the model
-        model_pred = model_forward[:,-1,:]
-        log_mx = (-model_pred).squeeze() #substitution of real values for predicted ones
-        mx = torch.exp(-model_pred).squeeze()
+        model_pred = model_forward.squeeze()[:,-1]
+        log_mx = (-model_pred) #substitution of real values for predicted ones
+        mx = torch.exp(-model_pred)
 
         #current year prediction on dictionary
-        predicted = get_mortality_dict_shell(year, ind_last_year, log_mx, mx)
+        predicted = get_mortality_dataframe_shell(year, ind_last_year, mx, log_mx)
 
         # Construction of dataframe for the values that we are going to keep for the next iteration
-        keep =  pd.DataFrame(mortality.copy())
-        mortality= keep.append(predicted)
+        mortality= pd.concat([mortality, predicted])
 
     prediction = (mortality[( mortality['Year'] >= (first_year)) ].copy())
 
@@ -90,13 +89,13 @@ def loss_recursive_forecasting( raw_test_data: pd.DataFrame, pred_data: pd.DataF
     if gender_model in ('both', 'Male'):
         real_test_male = (raw_test_data[raw_test_data['Gender'] == 'Male']).copy()[mx_column]
         recursive_prediction_male = (pred_data[pred_data['Gender'] == 'Male']).copy()[mx_column]
-        recursive_prediction_loss_male = np.round(mean_squared_error(real_test_male.to_numpy(),recursive_prediction_male[mx_column].to_numpy())*10**4,3)
+        recursive_prediction_loss_male = np.round(mean_squared_error(real_test_male.to_numpy(),recursive_prediction_male.to_numpy())*10**4,3)
         if gender_model == 'Male': recursive_prediction_loss_female = None
     
     if gender_model in ('both', 'Female'):
        real_test_female = (raw_test_data[raw_test_data['Gender'] == 'Female']).copy()[mx_column]
        recursive_prediction_female = (pred_data[pred_data['Gender'] == 'Female']).copy()[mx_column]
-       recursive_prediction_loss_female = np.round(mean_squared_error(real_test_female.to_numpy(),recursive_prediction_female[mx_column].to_numpy())*10**4,3)
+       recursive_prediction_loss_female = np.round(mean_squared_error(real_test_female.to_numpy(),recursive_prediction_female.to_numpy())*10**4,3)
        if gender_model == 'Female': recursive_prediction_loss_male = None
 
     return recursive_prediction_loss_male, recursive_prediction_loss_female
