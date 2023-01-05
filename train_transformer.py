@@ -162,10 +162,8 @@ def train(
         if batch_nb % log_interval == 0 and batch_nb > 0:
             ms_per_batch = (time.time() - start_time) * 1000 / log_interval
             cur_loss = total_loss / log_interval
-            ppl = math.exp(cur_loss)
-
             print(f'| epoch {epoch:3d} | {batch_nb:5d}/{num_batches:5d} batches | lr {last_lr:02.4f} | ms/batch {ms_per_batch:5.2f} | '
-                f'loss {cur_loss:5.2f} | ppl {ppl:8.2f}')
+                f'loss {cur_loss:5.2f}')
 
             total_loss = 0
             start_time = time.time()

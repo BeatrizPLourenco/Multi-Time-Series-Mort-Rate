@@ -5,7 +5,6 @@ Created on Fri Oct 14 18:23:31 2022
 
 @author: beatrizlourenco
 """
-
 import data_cleaning as dtclean
 import preprocessing_transformer as prt
 import train_transformer as trt
@@ -21,7 +20,7 @@ if __name__ == "__main__":
 
     # training
     training_mode = True
-    resume_training = False
+    resume_training = True
 
     # Check for control logic inconsistency 
     if not training_mode:
@@ -120,8 +119,8 @@ if __name__ == "__main__":
     #opt = optim.SGD(model.parameters(), lr = 0.05)
     opt = optim.Adam(model.parameters(), lr=0.001, betas = (0.9,0.98), eps =10**(-9))
     #scheduler = optim.lr_scheduler.StepLR(opt, step_size = 500, gamma = 0.99)
-    scheduler = Scheduler(opt, dim_embed = d_model, warmup_steps = 50)
-    epochs = 5
+    scheduler = Scheduler(opt, dim_embed = d_model, warmup_steps = 2000)
+    epochs = 1
 
     # Training
     if training_mode == True:
@@ -142,17 +141,8 @@ if __name__ == "__main__":
         best_model, history = trt.load_best_model(model)
     
     first_year, last_year = 2000, 2020
-
-    ######## IMPROVE THIS SLICE
-    import numpy as np
-    from sklearn.metrics import mean_squared_error
-    real_test_male = (testing_data[testing_data['Gender'] == 'Male']).copy()['mx']
-    real_test_female = (testing_data[testing_data['Gender'] == 'Female']).copy()['mx']
-    recursive_prediction_male = rf.recursive_forecast_both_genders(data, first_year,last_year, (T_encoder, T_decoder), tau0, xmin, xmax, model, xe_mask, tgt_mask, gender = 'Male')
-    recursive_prediction_loss_male = np.round(mean_squared_error(real_test_male.to_numpy(),recursive_prediction_male['mx'].to_numpy())*10**4,3)
-    recursive_prediction_female = rf.recursive_forecast_both_genders(data, first_year,last_year, (T_encoder, T_decoder), tau0, xmin, xmax, model, xe_mask, tgt_mask, gender = 'Male')
-    recursive_prediction_loss_female = np.round(mean_squared_error(real_test_male.to_numpy(),recursive_prediction_female['mx'].to_numpy())*10**4,3)
-    #########
+    recursive_prediction = rf.recursive_forecast(data, first_year,last_year, (T_encoder, T_decoder), tau0, xmin, xmax, model, xe_mask, tgt_mask)
+    recursive_prediction_loss_male, recursive_prediction_loss_female = rf.loss_recursive_forecasting(testing_data, recursive_prediction)
 
     trt.save_plots(history['train_loss_history'], history['val_loss_history'])
 
@@ -163,7 +153,7 @@ if __name__ == "__main__":
     print('| End of training | training loss {:5.2f} | validation loss {:5.2f} | test loss {:5.2f} | test ppl {:8.2f}'.format(
         history['train_loss_history'][-1], history['val_loss_history'][-1], test_loss, math.exp(test_loss)))
     print('-' * 89)
-    print('| Evaluating 20 years of recursive data | Male loss {:5.2f} | Female loss {:5.2f} '.format(recursive_prediction_loss_male,recursive_prediction_loss_female))
+    print('| Evaluating 20 years of recursive data | Male loss {:5.2f} | Female loss {:5.2f} '.format(recursive_prediction_loss_male, recursive_prediction_loss_female))
     print('=' * 89)
 
 
