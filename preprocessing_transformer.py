@@ -32,7 +32,7 @@ def from_numpy_to_torch(t: tuple) -> tuple:
     Returns:
         Tuple of torch tensors.
     """
-    return tuple(map(lambda x: torch.from_numpy(x).float(), t))
+    return tuple(map(lambda x: torch.from_numpy(x).float() if x is not None else None, t))
 
 
 

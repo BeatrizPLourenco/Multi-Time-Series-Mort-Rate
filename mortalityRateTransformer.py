@@ -176,7 +176,7 @@ class MortalityRateTransformer(nn.Module):
 
         else: 
             output = decoder_output
-            output = self.linear(output) # shape [batch_size, target seq len]
+            output = self.linear_mapping(output) # shape [batch_size, target seq len]
 
 
 

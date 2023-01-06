@@ -96,14 +96,14 @@ def load_best_model(model, best_model_dir: str = 'Saved_models'):
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-def get_batch(source: Tensor, i: int) -> tuple[Tensor, Tensor, Tensor, Tensor]:
+def get_batch(source: tuple, i: int) -> tuple:
     """Gets specific batch in a set.
 
     Returns:
         Tensor with desired batch.
     """
     
-    return source[0][i, :,:,:], source[1][i, :], source[2][i, :], source[3][i, :]
+    return source[0][i, :, :, :], source[1][i, :, :, :], source[2][i, :] if source[2] is not None else None, source[3][i, :]
 
 
 

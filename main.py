@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     # training
     training_mode = True
-    resume_training = False
+    resume_training = True
 
     # Check for control logic inconsistency 
     if not training_mode:
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     tau0 = 5
     split_value1 = 1989
     split_value2 = 2000
-    gender = 'both'
+    gender = 'Female'
     both_gender_model = (gender == 'both')
 
 
@@ -77,9 +77,9 @@ if __name__ == "__main__":
 
 
     elif gender == 'Male' or gender == 'Female' :
-        train_data = prt.preprocessed_data( training_data,  gender, (T_encoder, T_decoder), xmin, xmax, tau0, batch_size)
-        val_data = prt.preprocessed_data( validation_data, gender, (T_encoder, T_decoder), xmin, xmax, tau0, batch_size)
-        test_data = prt.preprocessed_data(testing_data, gender,  (T_encoder, T_decoder), xmin, xmax, tau0, batch_size)
+        train_data = prt.preprocessed_data( training_data,  gender, (T_encoder, T_decoder),tau0, xmin, xmax, batch_size)
+        val_data = prt.preprocessed_data( validation_data, gender, (T_encoder, T_decoder),tau0, xmin, xmax, batch_size)
+        test_data = prt.preprocessed_data(testing_data, gender,  (T_encoder, T_decoder),tau0, xmin, xmax, batch_size)
 
 
     train_data, val_data, test_data = prt.from_numpy_to_torch(train_data), prt.from_numpy_to_torch(val_data), prt.from_numpy_to_torch(test_data)
@@ -142,19 +142,23 @@ if __name__ == "__main__":
     
     first_year, last_year = 2000, 2020
     recursive_prediction = rf.recursive_forecast(data, first_year,last_year, (T_encoder, T_decoder), tau0, xmin, xmax, model, xe_mask, tgt_mask)
-    recursive_prediction_loss_male, recursive_prediction_loss_female = rf.loss_recursive_forecasting(testing_data, recursive_prediction)
+    recursive_prediction_loss_male, recursive_prediction_loss_female = rf.loss_recursive_forecasting(testing_data, recursive_prediction, gender_model = gender)
 
     trt.save_plots(history['train_loss_history'], history['val_loss_history'])
 
     # Evaluation
     test_loss = trt.evaluate(best_model, batch_size, test_data, tgt_mask,  xe_mask, criterion)
 
-    print('=' * 89)
+    print('=' * 100)
     print('| End of training | training loss {:5.2f} | validation loss {:5.2f} | test loss {:5.2f} | test ppl {:8.2f}'.format(
         history['train_loss_history'][-1], history['val_loss_history'][-1], test_loss, math.exp(test_loss)))
-    print('-' * 89)
-    print('| Evaluating 20 years of recursive data | Male loss {:5.2f} | Female loss {:5.2f} '.format(recursive_prediction_loss_male, recursive_prediction_loss_female))
-    print('=' * 89)
+    print('-' * 100)
+    text_to_print = '| Evaluating 20 years of recursive data'
+    if recursive_prediction_loss_male is not None: text_to_print = text_to_print + '| Male loss {:5.2f}'.format(recursive_prediction_loss_male)
+    if recursive_prediction_loss_female is not None: text_to_print = text_to_print + '| female loss {:5.2f}'.format(recursive_prediction_loss_female)
+    print(text_to_print)
+    
+    print('=' * 100)
 
 
 
