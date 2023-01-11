@@ -14,13 +14,13 @@ from torch import nn, optim
 import recursive_forecast as rf
 import math
 #import warnings
-#warnings.filterwarnings('ignore')
+#warnings.filterwarnings('ignore') 
 
 if __name__ == "__main__":
 
     # training
     training_mode = True
-    resume_training = True
+    resume_training = False
 
     # Check for control logic inconsistency 
     if not training_mode:
@@ -38,8 +38,10 @@ if __name__ == "__main__":
     tau0 = 5
     split_value1 = 1989
     split_value2 = 2000
-    gender = 'Female'
+    gender = 'both'
     both_gender_model = (gender == 'both')
+    checkpoint_dir = f'Saved_models/checkpoint_{gender}.pt'
+    best_model_dir = f'Saved_models/best_model_{gender}.pt'
 
 
     # Model hyperparameters  
@@ -120,7 +122,7 @@ if __name__ == "__main__":
     opt = optim.Adam(model.parameters(), lr=0.001, betas = (0.9,0.98), eps =10**(-9))
     #scheduler = optim.lr_scheduler.StepLR(opt, step_size = 500, gamma = 0.99)
     scheduler = Scheduler(opt, dim_embed = d_model, warmup_steps = 4000)
-    epochs = 1
+    epochs = 50
 
     # Training
     if training_mode == True:
@@ -135,7 +137,9 @@ if __name__ == "__main__":
             opt = opt, 
             criterion = criterion, 
             scheduler = scheduler,
-            resume_training = resume_training
+            resume_training = resume_training,
+            checkpoint_dir= checkpoint_dir,
+            best_model_dir= best_model_dir
         )
     else:
         best_model, history = trt.load_best_model(model)

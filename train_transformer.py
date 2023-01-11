@@ -35,7 +35,7 @@ def save_plots(train_loss: list, valid_loss: list) -> None:
     plt.savefig('Images/loss.pdf')
 
 
-def save_ckp(state: dict, is_best: bool, checkpoint_dir: str = 'Saved_models', best_model_dir: str = 'Saved_models') -> None:
+def save_ckp(state: dict, is_best: bool, checkpoint_dir: str = 'Saved_models/checkpoint.pt', best_model_dir: str = 'Saved_models/best_model.pt') -> None:
     """Saves the current state of training into a directory.
 
     Args:
@@ -45,14 +45,14 @@ def save_ckp(state: dict, is_best: bool, checkpoint_dir: str = 'Saved_models', b
         best_model_dir: directory to save the best model.
     """
 
-    f_path = checkpoint_dir + '/checkpoint.pt'
+    f_path = checkpoint_dir
     torch.save(state, f_path)
     if is_best:
-        best_fpath = best_model_dir + '/best_model.pt'
+        best_fpath = best_model_dir
         shutil.copyfile(f_path, best_fpath)
 
 
-def load_ckp( model, optimizer, scheduler, checkpoint_dir: str = 'Saved_models') -> None:
+def load_ckp( model, optimizer, scheduler, checkpoint_dir: str = 'Saved_models/checkpoint.pt') -> None:
     """ Loads the latest checkpoint into the model and the optimizer.
 
     Args: 
@@ -61,7 +61,7 @@ def load_ckp( model, optimizer, scheduler, checkpoint_dir: str = 'Saved_models')
         checkpoint_dir: directory to save the checkpoint."""
     
 
-    checkpoint_fpath = checkpoint_dir + '/checkpoint.pt'
+    checkpoint_fpath = checkpoint_dir 
     checkpoint = torch.load(checkpoint_fpath)
     model.load_state_dict(checkpoint['state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer'])
@@ -74,7 +74,7 @@ def load_ckp( model, optimizer, scheduler, checkpoint_dir: str = 'Saved_models')
 
 
 
-def load_best_model(model, best_model_dir: str = 'Saved_models'):
+def load_best_model(model, best_model_dir: str = 'Saved_models/best_model.pt'):
     """Loads the best model from the disk.
 
     Args:
@@ -85,12 +85,12 @@ def load_best_model(model, best_model_dir: str = 'Saved_models'):
         checkpoint_history: dictonary with training_loss_history, val_loss_history, lr_history
     """
 
-    checkpoint_fpath = best_model_dir + '/best_model.pt'
+    checkpoint_fpath = best_model_dir 
     checkpoint = torch.load(checkpoint_fpath)
     model.load_state_dict(checkpoint['state_dict'])
-    #checkpoint_history = checkpoint['history'] TIRAR ISTO
+    checkpoint_history = checkpoint['history']
 
-    return model, checkpoint
+    return model, checkpoint_history
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -222,7 +222,9 @@ def fit(
     opt: torch.optim, 
     criterion = torch.nn.MSELoss, 
     scheduler: torch.optim.lr_scheduler = None,
-    resume_training: bool = False):
+    resume_training: bool = False,
+    checkpoint_dir:str = 'Saved_models/checkpoint.pt',
+    best_model_dir: str = 'Saved_models/best_model.pt'):
 
     """Fits the transformer model to the training data.
 
@@ -252,7 +254,7 @@ def fit(
 
     if resume_training:
 
-        start_epoch, model, opt, scheduler, checkpoint_history = load_ckp( model, opt, scheduler)
+        start_epoch, model, opt, scheduler, checkpoint_history = load_ckp( model, opt, scheduler, checkpoint_dir )
         train_loss_history, val_loss_history, lr_history = checkpoint_history['train_loss_history'], checkpoint_history['val_loss_history'], checkpoint_history['lr_history']
 
     best_model = model
@@ -297,7 +299,7 @@ def fit(
                 'lr_history': lr_history}
             }
 
-        save_ckp(checkpoint, is_best)
+        save_ckp(checkpoint, is_best,checkpoint_dir = checkpoint_dir, best_model_dir = best_model_dir )
 
         last_val_loss = val_loss
     
