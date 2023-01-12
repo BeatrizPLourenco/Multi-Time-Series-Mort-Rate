@@ -277,6 +277,11 @@ def fit(
         lr_history.append(cur_train_loop['lr'])
 
         val_loss = evaluate(model,batch_size, val_data, tgt_mask, xe_mask, criterion)
+
+        if val_loss < min(val_loss):
+            is_best = True
+            best_model = model
+            
         val_loss_history.append(val_loss)
 
         elapsed = time.time() - epoch_start_time
@@ -285,9 +290,6 @@ def fit(
         print(f'| end of epoch {epoch:3d} | time: {elapsed:5.2f}s | valid loss {val_loss:5.2f}')
         print('-' * 89)
 
-        if val_loss < last_val_loss:
-            is_best = True
-            best_model = model
 
         checkpoint = {
             'epoch': epoch + 1,

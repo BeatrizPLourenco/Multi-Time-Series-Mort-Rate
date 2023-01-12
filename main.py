@@ -142,7 +142,7 @@ if __name__ == "__main__":
             best_model_dir= best_model_dir
         )
     else:
-        best_model, history = trt.load_best_model(model)
+        best_model, history = trt.load_best_model(model, best_model_dir= best_model_dir)
     
     first_year, last_year = 2000, 2020
     recursive_prediction = rf.recursive_forecast(data, first_year,last_year, (T_encoder, T_decoder), tau0, xmin, xmax, model, xe_mask, tgt_mask)
