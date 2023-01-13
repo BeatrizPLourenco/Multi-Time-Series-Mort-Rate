@@ -55,6 +55,8 @@ def recursive_forecast(
     last_obs_year: int = 1999,
     columns: list = ['Year', 'Age','mx', 'logmx', 'Gender']) -> pd.DataFrame:
 
+    model.eval()
+
     timerange = T[0] + T[1]
 
     # first window of T=10 years to predict the first year ( (last_obs_year-T) to last_obs_year => predicts last_obs_year+1):

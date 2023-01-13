@@ -14,7 +14,7 @@ import math, time, copy
 import shutil
 import matplotlib.pyplot as plt
 
-def save_plots(train_loss: list, valid_loss: list) -> None:
+def save_plots(train_loss: list, valid_loss: list, gender: str) -> None:
     """
     Function to save the loss and accuracy plots to disk.
     """
@@ -32,7 +32,7 @@ def save_plots(train_loss: list, valid_loss: list) -> None:
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
-    plt.savefig('Images/loss.pdf')
+    plt.savefig(f'Images/loss{gender}.pdf')
 
 
 def save_ckp(state: dict, is_best: bool, checkpoint_dir: str = 'Saved_models/checkpoint.pt', best_model_dir: str = 'Saved_models/best_model.pt') -> None:
@@ -85,8 +85,7 @@ def load_best_model(model, best_model_dir: str = 'Saved_models/best_model.pt'):
         checkpoint_history: dictonary with training_loss_history, val_loss_history, lr_history
     """
 
-    checkpoint_fpath = best_model_dir 
-    checkpoint = torch.load(checkpoint_fpath)
+    checkpoint = torch.load(best_model_dir)
     model.load_state_dict(checkpoint['state_dict'])
     checkpoint_history = checkpoint['history']
 
@@ -258,9 +257,11 @@ def fit(
         train_loss_history, val_loss_history, lr_history = checkpoint_history['train_loss_history'], checkpoint_history['val_loss_history'], checkpoint_history['lr_history']
 
     best_model = model
-    last_val_loss = val_loss_history[-1]
+    lowest_val_loss = val_loss_history[-1]
 
     for epoch in range(start_epoch, epochs + 1):
+        is_best = False
+
         epoch_start_time = time.time()
 
         cur_train_loop = train(
@@ -278,9 +279,13 @@ def fit(
 
         val_loss = evaluate(model,batch_size, val_data, tgt_mask, xe_mask, criterion)
 
-        if val_loss < min(val_loss):
+        
+        if val_loss < lowest_val_loss:
             is_best = True
+            lowest_val_loss = val_loss
             best_model = model
+
+        
             
         val_loss_history.append(val_loss)
 
@@ -303,7 +308,6 @@ def fit(
 
         save_ckp(checkpoint, is_best,checkpoint_dir = checkpoint_dir, best_model_dir = best_model_dir )
 
-        last_val_loss = val_loss
     
     history = {
         'train_loss_history': train_loss_history,

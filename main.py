@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     # training
     training_mode = True
-    resume_training = False
+    resume_training = True
 
     # Check for control logic inconsistency 
     if not training_mode:
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     opt = optim.Adam(model.parameters(), lr=0.001, betas = (0.9,0.98), eps =10**(-9))
     #scheduler = optim.lr_scheduler.StepLR(opt, step_size = 500, gamma = 0.99)
     scheduler = Scheduler(opt, dim_embed = d_model, warmup_steps = 4000)
-    epochs = 50
+    epochs = 500
 
     # Training
     if training_mode == True:
@@ -148,15 +148,19 @@ if __name__ == "__main__":
     recursive_prediction = rf.recursive_forecast(data, first_year,last_year, (T_encoder, T_decoder), tau0, xmin, xmax, model, xe_mask, tgt_mask)
     recursive_prediction_loss_male, recursive_prediction_loss_female = rf.loss_recursive_forecasting(testing_data, recursive_prediction, gender_model = gender)
 
-    trt.save_plots(history['train_loss_history'], history['val_loss_history'])
+    trt.save_plots(history['train_loss_history'], history['val_loss_history'], gender = gender)
 
     # Evaluation
     test_loss = trt.evaluate(best_model, batch_size, test_data, tgt_mask,  xe_mask, criterion)
+    val_loss = trt.evaluate(best_model, batch_size, val_data, tgt_mask,  xe_mask, criterion)
+    train_loss = trt.evaluate(best_model, batch_size, train_data, tgt_mask,  xe_mask, criterion)
+
 
     print('=' * 100)
     print('| End of training | training loss {:5.2f} | validation loss {:5.2f} | test loss {:5.2f} | test ppl {:8.2f}'.format(
-        history['train_loss_history'][-1], history['val_loss_history'][-1], test_loss, math.exp(test_loss)))
+        train_loss, val_loss, test_loss, math.exp(test_loss)))
     print('-' * 100)
+
     text_to_print = '| Evaluating 20 years of recursive data'
     if recursive_prediction_loss_male is not None: text_to_print = text_to_print + '| Male loss {:5.2f}'.format(recursive_prediction_loss_male)
     if recursive_prediction_loss_female is not None: text_to_print = text_to_print + '| female loss {:5.2f}'.format(recursive_prediction_loss_female)
