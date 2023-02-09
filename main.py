@@ -13,8 +13,6 @@ import mortalityRateTransformer as mrt
 from torch import nn, optim
 import recursive_forecast as rf
 import math
-#import warnings
-#warnings.filterwarnings('ignore') 
 
 if __name__ == "__main__":
 

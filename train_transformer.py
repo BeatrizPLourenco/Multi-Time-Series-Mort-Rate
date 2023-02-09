@@ -274,20 +274,18 @@ def fit(
             optimizer = opt, 
             criterion = criterion,
             scheduler = scheduler)
+
         train_loss_history.append(cur_train_loop['loss'])
         lr_history.append(cur_train_loop['lr'])
 
         val_loss = evaluate(model,batch_size, val_data, tgt_mask, xe_mask, criterion)
-
+        val_loss_history.append(val_loss)
         
         if val_loss < lowest_val_loss:
             is_best = True
             lowest_val_loss = val_loss
             best_model = model
-
         
-            
-        val_loss_history.append(val_loss)
 
         elapsed = time.time() - epoch_start_time
 
