@@ -70,6 +70,8 @@ class MortalityRateTransformer(nn.Module):
 
 
         super().__init__() 
+        self.T_decoder = T_decoder
+        self.T_encoder = T_encoder
 
         self.both_gender_model = both_gender_model
 
@@ -156,6 +158,16 @@ class MortalityRateTransformer(nn.Module):
         Returns:
             Tensor with shape: [T_decoder, batch_size, num_predicted_features]
         """
+        if dec_in_mask is None or enc_out_mask is None:
+            dec_in_mask = generate_square_subsequent_mask(
+            dim1 = self.T_decoder,
+            dim2 = self.T_decoder
+            )
+            
+            enc_out_mask = generate_square_subsequent_mask(
+                dim1 = self.T_decoder,
+                dim2 = self.T_encoder
+            )
 
 
         encoder_input = self.encoder_input_layer( src ) # src shape: [batch_size, enc_seq_len, d_model] regardless of number of input features

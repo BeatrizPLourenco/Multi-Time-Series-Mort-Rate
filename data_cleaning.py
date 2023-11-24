@@ -9,6 +9,9 @@ from os.path import exists
 import pandas as pd
 import numpy as np
 
+def get_data_of_gender( data, gender: str):
+
+    return data[ (data['Gender'] == gender)]
 
 def restructuring_portuguese_data(raw_data: pd.DataFrame) -> pd.DataFrame: # adds age, year and gender; joins male and female datasets
     """Restructuring portuguese data.

@@ -10,15 +10,16 @@ import preprocessing_transformer as prt
 import train_transformer as trt
 from scheduler import Scheduler
 import mortalityRateTransformer as mrt
-from torch import nn, optim
+from torch import nn, optim, zeros
 import recursive_forecast as rf
+import explainability as xai
 import math
 
 if __name__ == "__main__":
 
     # training
-    training_mode = True
-    resume_training = True
+    training_mode = False
+    resume_training = False
 
     # Check for control logic inconsistency 
     if not training_mode:
@@ -34,8 +35,8 @@ if __name__ == "__main__":
     T_encoder = 7
     T_decoder = 3
     tau0 = 5
-    split_value1 = 1989
-    split_value2 = 2000
+    split_value1 = 2000
+    split_value2 = 2001
     gender = 'both'
     both_gender_model = (gender == 'both')
     checkpoint_dir = f'Saved_models/checkpoint_{gender}.pt'
@@ -141,7 +142,8 @@ if __name__ == "__main__":
         )
     else:
         best_model, history = trt.load_best_model(model, best_model_dir= best_model_dir)
-    
+        
+    """
     first_year, last_year = 2000, 2020
     recursive_prediction = rf.recursive_forecast(data, first_year,last_year, (T_encoder, T_decoder), tau0, xmin, xmax, model, xe_mask, tgt_mask)
     recursive_prediction_loss_male, recursive_prediction_loss_female = rf.loss_recursive_forecasting(testing_data, recursive_prediction, gender_model = gender)
@@ -164,7 +166,18 @@ if __name__ == "__main__":
     if recursive_prediction_loss_female is not None: text_to_print = text_to_print + '| female loss {:5.2f}'.format(recursive_prediction_loss_female)
     print(text_to_print)
     
-    print('=' * 100)
+    print('=' * 100)"""
+    
+    # Explain Model
+    unbatch_input = prt.unbatchify(test_data)
+    exp_model = xai.ExplainableMortalityRateTransformer('both gender Transformer', best_model)
+
+    sample_index = 1
+    dim_to_explain = 1
+    sample = prt.get_pattern(unbatch_input, sample_index)[:-1]
+    exp_model.explain(sample, batched_input = False, dim_to_explain = dim_to_explain)
+    print()
+    
 
 
 

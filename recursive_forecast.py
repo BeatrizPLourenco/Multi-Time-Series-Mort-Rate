@@ -35,11 +35,54 @@ def get_mortality_dataframe_shell(
     if sort_age: age_list.sort()
 
     year_list = [year] * nb_genders * len(age_range)
-    gender_list = pd.Categorical(gender_idx.tolist()).rename_categories(['Female','Male'])
+    #gender_list = pd.Categorical(gender_idx.tolist()).rename_categories(['Female','Male'])
+
+    gender_list = pd.Categorical(gender_idx.tolist()).rename_categories({0:'Female',1:'Male'})
     model_pred_mx_list = model_pred_mx.tolist()
     model_pred_logmx_list = model_pred_logmx.tolist()
 
     return pd.DataFrame({ 'Year': year_list, 'Age': age_list, 'Gender': gender_list, 'mx': model_pred_mx_list, 'logmx': model_pred_logmx_list })
+
+def recursive_forecast_both_genders(data,first_year,last_year,T,tau0, xmin, xmax, model, gender = 'Both'):
+  with torch.no_grad():
+    ObsYear = 1999 #last obs year
+
+    # first window of T=10 years to predict the first year ( (ObsYear-T) to ObsYear => predicts ObsYear+1):
+    mortality = data[(data['Year'] <= ObsYear)].copy()
+    mortality = mortality[['Year', 'Age','mx', 'logmx', 'Gender']].copy()
+
+    for  year in range(ObsYear+1, last_year+1): # The next year is recursively predicted 
+        mort = mortality[( mortality['Year'] >= (year-T-1))].copy() #selection of only the last T years
+        x_mort, gender_indicator, y_mort = prt.preprocessing_with_both_gendersLSTM(mort, T, tau0, xmin, xmax) 
+        x_mort, gender_indicator,= prt.from_numpy_to_torch((x_mort, gender_indicator,))
+
+
+        l=[]
+        for i in range(0,100):
+            l.extend([i]*2)
+
+        predicted = pd.DataFrame({ 'Year': ([year]*200), 'Age': l, 
+                                'Gender': pd.Categorical((gender_indicator.squeeze()).tolist()).rename_categories(['Female','Male']) }) 
+
+
+        # Construction of prediction table for the test set:
+        model_pred= (model(x_mort, gender_indicator)) #prediction of the model
+        predicted['logmx'] = (-model_pred).squeeze().tolist() #substitution of real values for predicted ones
+        predicted['mx'] = torch.exp((-model_pred).squeeze()).tolist()
+        import warnings
+        warnings.filterwarnings("ignore")
+
+        # Construction of dataframe for the values that we are going to keep for the next iteration
+        keep =  pd.DataFrame(mortality.copy())
+        mortality= keep.append(predicted)
+
+        prediction = (mortality[( mortality['Year'] >= (first_year)) ].copy())
+        if gender in {'Male', 'Female'}:
+            prediction = prediction[prediction['Gender'] == gender]
+  
+  return prediction
+
+
 
 def recursive_forecast(
     raw_data: pd.DataFrame, 
@@ -50,14 +93,18 @@ def recursive_forecast(
     xmin: float, 
     xmax: float, 
     model: mrt.MortalityRateTransformer, 
-    enc_out_mask: torch.Tensor, 
-    dec_in_mask: torch.Tensor, 
+    enc_out_mask: torch.Tensor = None, 
+    dec_in_mask: torch.Tensor = None, 
     last_obs_year: int = 1999,
-    columns: list = ['Year', 'Age','mx', 'logmx', 'Gender']) -> pd.DataFrame:
+    columns: list = ['Year', 'Age','mx', 'logmx', 'Gender'],
+    model_type:str = 'transformer') -> pd.DataFrame:
 
     model.eval()
 
-    timerange = T[0] + T[1]
+    if model_type == 'transformer':
+        timerange = T[0] + T[1]
+    elif model_type == 'lstm':
+        timerange = T
 
     # first window of T=10 years to predict the first year ( (last_obs_year-T) to last_obs_year => predicts last_obs_year+1):
     mortality = get_data_in_time_range(raw_data, last_year = last_obs_year)
@@ -65,14 +112,24 @@ def recursive_forecast(
 
     for  year in range(last_obs_year+1, last_year+1): # The next year is recursively predicted 
         mort = get_data_in_time_range(mortality, first_year = year-timerange-1) #selection of only the last timerange years
-        xe, xd, ind, yd = prt.preprocessing_with_both_genders(mort, T, tau0, xmin, xmax, 1) 
-        xe, xd, ind = prt.from_numpy_to_torch((xe, xd, ind))
-        xe, xd, ind = xe.squeeze(), xd.squeeze(1), ind.squeeze(1)
-        ind_last_year = ind.squeeze()[:,1]
+        if model_type == 'transformer':
+            xe, xd, ind, yd = prt.preprocessing_with_both_genders(mort, T, tau0, xmin, xmax, 1) 
+            xe, xd, ind = prt.from_numpy_to_torch((xe, xd, ind))
+            xe, xd, ind = xe.squeeze(), xd.squeeze(1), ind.squeeze(1)
+            ind_last_year = ind.squeeze()[:,1]
+        elif model_type == 'lstm': #REVER
+            x, ind, y = prt.preprocessing_with_both_gendersLSTM(mort, T, tau0, xmin, xmax, 1) 
+            x, ind = prt.from_numpy_to_torch((x, ind))
+            x, ind = x.squeeze(), ind.squeeze(1)
+            ind_last_year = ind.squeeze()
 
         # Construction of prediction table for the test set:
-        model_forward = model(xe, xd, ind, enc_out_mask, dec_in_mask) #prediction of the model
-        model_pred = model_forward.squeeze()[:,-1]
+        if model_type == 'transformer':
+            model_forward = model(xe, xd, ind, enc_out_mask, dec_in_mask) #prediction of the model
+            model_pred = model_forward.squeeze()[:,-1]
+        elif model_type == 'lstm':
+            model_forward = model(x, ind)        
+            model_pred = model_forward.squeeze()
         log_mx = (-model_pred) #substitution of real values for predicted ones
         mx = torch.exp(-model_pred)
 

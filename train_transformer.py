@@ -18,9 +18,10 @@ def save_plots(train_loss: list, valid_loss: list, gender: str) -> None:
     """
     Function to save the loss and accuracy plots to disk.
     """
+    plt.rcParams.update({'font.size': 18})
 
     # loss plots
-    plt.figure(figsize=(10, 7))
+    plt.figure(figsize=(10, 10))
     plt.plot(
         train_loss, color='orange', linestyle='-', 
         label='train loss'
@@ -29,9 +30,11 @@ def save_plots(train_loss: list, valid_loss: list, gender: str) -> None:
         valid_loss, color='red', linestyle='-', 
         label='validation loss'
     )
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.legend()
+    plt.xlabel('Epochs',fontsize = 18, fontweight='bold')
+    plt.yticks(fontsize = 18)
+    plt.xticks(fontsize = 18)
+    plt.ylabel('Loss',fontsize = 18, fontweight='bold')
+    plt.legend(prop=dict(size=18))
     plt.savefig(f'Images/loss{gender}.pdf')
 
 
@@ -222,6 +225,7 @@ def fit(
     criterion = torch.nn.MSELoss, 
     scheduler: torch.optim.lr_scheduler = None,
     resume_training: bool = False,
+    patience = 50,
     checkpoint_dir:str = 'Saved_models/checkpoint.pt',
     best_model_dir: str = 'Saved_models/best_model.pt'):
 
@@ -259,9 +263,10 @@ def fit(
     best_model = model
     lowest_val_loss = val_loss_history[-1]
 
+    epochs_without_improvement = 0
     for epoch in range(start_epoch, epochs + 1):
         is_best = False
-
+        
         epoch_start_time = time.time()
 
         cur_train_loop = train(
@@ -274,18 +279,27 @@ def fit(
             optimizer = opt, 
             criterion = criterion,
             scheduler = scheduler)
-
         train_loss_history.append(cur_train_loop['loss'])
         lr_history.append(cur_train_loop['lr'])
 
         val_loss = evaluate(model,batch_size, val_data, tgt_mask, xe_mask, criterion)
-        val_loss_history.append(val_loss)
-        
+
+
         if val_loss < lowest_val_loss:
             is_best = True
             lowest_val_loss = val_loss
             best_model = model
+            epochs_without_improvement = 0
         
+        else:
+          epochs_without_improvement +=1
+
+        if epochs_without_improvement > patience:
+          break
+
+        
+            
+        val_loss_history.append(val_loss)
 
         elapsed = time.time() - epoch_start_time
 
