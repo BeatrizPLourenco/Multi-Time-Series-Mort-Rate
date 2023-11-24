@@ -47,7 +47,6 @@ if __name__ == "__main__":
 
 
     # Model hyperparameters  
-    input_size = 5
     batch_first = True
     batch_size = 100
 
