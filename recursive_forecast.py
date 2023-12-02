@@ -93,11 +93,13 @@ def recursive_forecast(
     xmin: float, 
     xmax: float, 
     model: mrt.MortalityRateTransformer, 
+    batch_size:int,
     enc_out_mask: torch.Tensor = None, 
     dec_in_mask: torch.Tensor = None, 
-    last_obs_year: int = 1999,
     columns: list = ['Year', 'Age','mx', 'logmx', 'Gender'],
     model_type:str = 'transformer') -> pd.DataFrame:
+
+    last_obs_year = first_year-1
 
     model.eval()
 
@@ -113,10 +115,10 @@ def recursive_forecast(
     for  year in range(last_obs_year+1, last_year+1): # The next year is recursively predicted 
         mort = get_data_in_time_range(mortality, first_year = year-timerange-1) #selection of only the last timerange years
         if model_type == 'transformer':
-            xe, xd, ind, yd = prt.preprocessing_with_both_genders(mort, T, tau0, xmin, xmax, 1) 
+            xe, xd, ind, yd = prt.preprocessing_with_both_genders(mort, T, tau0, xmin, xmax, 1, 1) 
             xe, xd, ind = prt.from_numpy_to_torch((xe, xd, ind))
             xe, xd, ind = xe.squeeze(), xd.squeeze(1), ind.squeeze(1)
-            ind_last_year = ind.squeeze()[:,1]
+            ind_last_year = ind.squeeze(2)[:,-1]
         elif model_type == 'lstm': #REVER
             x, ind, y = prt.preprocessing_with_both_gendersLSTM(mort, T, tau0, xmin, xmax, 1) 
             x, ind = prt.from_numpy_to_torch((x, ind))
@@ -126,7 +128,7 @@ def recursive_forecast(
         # Construction of prediction table for the test set:
         if model_type == 'transformer':
             model_forward = model(xe, xd, ind, enc_out_mask, dec_in_mask) #prediction of the model
-            model_pred = model_forward.squeeze()[:,-1]
+            model_pred = model_forward.squeeze(2)[:,-1]
         elif model_type == 'lstm':
             model_forward = model(x, ind)        
             model_pred = model_forward.squeeze()

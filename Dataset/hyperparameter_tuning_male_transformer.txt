@@ -1,0 +1,1 @@
+{"best_hyperparameters_m": {"T": [9, 1], "tau0": 3, "batch_size": 5, "d_model": 4, "n_decoder_layers": 1, "n_encoder_layers": 1, "n_heads": 1, "dropout_encoder": 0.2, "dropout_decoder": 0.2, "dropout_pos_enc": 0.2, "dim_feedforward_encoder": 4, "dim_feedforward_decoder": 4, "epochs": 1}, "best_evaluation_m": 148.243}

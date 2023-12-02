@@ -45,7 +45,7 @@ def get_pattern(unbatch_input: tuple, i: int) -> tuple:
 
 
 def transformer_input_shaping(padd_train,T_encoder, T_decoder,tau0, batch_size, num_out_features):
-
+    #batch_size=5
     t1 = padd_train.shape[0]-(T_encoder + T_decoder-1)-1
     a1 = padd_train.shape[1]-(tau0-1)
     n_train = t1 * a1 # number of training samples

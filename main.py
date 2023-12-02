@@ -14,6 +14,8 @@ from torch import nn, optim, zeros
 import recursive_forecast as rf
 import explainability as xai
 import math
+from sklearn.model_selection import GridSearchCV
+
 
 if __name__ == "__main__":
 
@@ -28,15 +30,15 @@ if __name__ == "__main__":
     
     # Control
     country = "PT"
-    split_value = 2000
+    #split_value = 2000
     raw_filenamePT = 'Dataset/Mx_1x1_alt.txt'
     raw_filenameSW = 'Dataset/CHE_mort.xlsx'
     T = 10
     T_encoder = 7
     T_decoder = 3
     tau0 = 5
-    split_value1 = 2000
-    split_value2 = 2001
+    split_value1 = 1993 # 1993 a 2005 corresponde a 13 anos (13/66 approx. 20%)
+    split_value2 = 2006 # 2006 a 2022 corresponde a 17 anos (17/83 approx. 20%)
     gender = 'both'
     both_gender_model = (gender == 'both')
     checkpoint_dir = f'Saved_models/checkpoint_{gender}.pt'
@@ -143,8 +145,8 @@ if __name__ == "__main__":
     else:
         best_model, history = trt.load_best_model(model, best_model_dir= best_model_dir)
         
-    """
-    first_year, last_year = 2000, 2020
+    
+    first_year, last_year = 2006, 2022
     recursive_prediction = rf.recursive_forecast(data, first_year,last_year, (T_encoder, T_decoder), tau0, xmin, xmax, model, xe_mask, tgt_mask)
     recursive_prediction_loss_male, recursive_prediction_loss_female = rf.loss_recursive_forecasting(testing_data, recursive_prediction, gender_model = gender)
 
@@ -166,8 +168,9 @@ if __name__ == "__main__":
     if recursive_prediction_loss_female is not None: text_to_print = text_to_print + '| female loss {:5.2f}'.format(recursive_prediction_loss_female)
     print(text_to_print)
     
-    print('=' * 100)"""
+    print('=' * 100)
     
+    """
     # Explain Model
     unbatch_input = prt.unbatchify(test_data)
     exp_model = xai.ExplainableMortalityRateTransformer('both gender Transformer', best_model)
@@ -176,7 +179,7 @@ if __name__ == "__main__":
     dim_to_explain = 1
     sample = prt.get_pattern(unbatch_input, sample_index)[:-1]
     exp_model.explain(sample, batched_input = False, dim_to_explain = dim_to_explain)
-    print()
+    print()"""
     
 
 

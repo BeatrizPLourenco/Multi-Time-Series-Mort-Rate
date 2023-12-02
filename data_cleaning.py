@@ -23,12 +23,14 @@ def restructuring_portuguese_data(raw_data: pd.DataFrame) -> pd.DataFrame: # add
         Dataframe with columns 'Year', 'Age', 'Gender', 'mx' (mortality rate)
     """
 
+    year_max= raw_data.Year.max()
+    year_min= raw_data.Year.min()
     Year = []
     Age = []
     mx = []
     Gender = []
 
-    for year in range(1940, 2020+1):
+    for year in range(year_min, year_max+1):
         dt = raw_data[raw_data['Year'] == year]
         Year.extend((dt['Year'].to_list())*2)
         Age.extend((dt['Age'].to_list())*2)
@@ -124,13 +126,13 @@ def get_country_data(country: str, filedir: str = None):
     if country not in filedir_dict.keys():
         raise Exception("Invalid Country selected!")
 
-    if not path.exists(filedir_dict.get(country)):
+    if not path.exists(filedir_dict.get(country)) or filedir != None:
         assert path.exists(filedir)
         if country == "PT":
             data = pd.read_csv(filedir, header=None, sep='\s+', names=["Year", "Age", "mxf", "mxm", 'mxTotal'])
             data = preprocessing_dataPT(data)
             data.to_excel(filedir_dict.get(country), index=False)
-        
+    
         elif country == 'SW':
             data = pd.DataFrame(pd.read_excel(filedir))
             data.to_excel(filedir_dict.get(country), index=False)

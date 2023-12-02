@@ -118,7 +118,8 @@ def train(
     xe_mask: Tensor,  
     optimizer: torch.optim, 
     criterion = torch.nn.MSELoss,
-    scheduler: torch.optim.lr_scheduler = None,) -> None:
+    scheduler: torch.optim.lr_scheduler = None,
+    verbose = 1) -> None:
 
     """Trains the model through 1 epoch.
 
@@ -164,8 +165,9 @@ def train(
         if batch_nb % log_interval == 0 and batch_nb > 0:
             ms_per_batch = (time.time() - start_time) * 1000 / log_interval
             cur_loss = total_loss / log_interval
-            print(f'| epoch {epoch:3d} | {batch_nb:5d}/{num_batches:5d} batches | lr {last_lr:02.4f} | ms/batch {ms_per_batch:5.2f} | '
-                f'loss {cur_loss:5.2f}')
+            if verbose == 1:
+                print(f'| epoch {epoch:3d} | {batch_nb:5d}/{num_batches:5d} batches | lr {last_lr:02.4f} | ms/batch {ms_per_batch:5.2f} | '
+                    f'loss {cur_loss:5.2f}')
 
             total_loss = 0
             start_time = time.time()
@@ -225,9 +227,10 @@ def fit(
     criterion = torch.nn.MSELoss, 
     scheduler: torch.optim.lr_scheduler = None,
     resume_training: bool = False,
-    patience = 50,
+    patience: int= 50,
     checkpoint_dir:str = 'Saved_models/checkpoint.pt',
-    best_model_dir: str = 'Saved_models/best_model.pt'):
+    best_model_dir: str = 'Saved_models/best_model.pt',
+    verbose = 1):
 
     """Fits the transformer model to the training data.
 
@@ -278,7 +281,8 @@ def fit(
             epoch = epoch, 
             optimizer = opt, 
             criterion = criterion,
-            scheduler = scheduler)
+            scheduler = scheduler, 
+            verbose = verbose)
         train_loss_history.append(cur_train_loop['loss'])
         lr_history.append(cur_train_loop['lr'])
 
@@ -295,7 +299,8 @@ def fit(
           epochs_without_improvement +=1
 
         if epochs_without_improvement > patience:
-          break
+            print(f'Early stopping after {epochs_without_improvement} epochs without improvement.')
+            break
 
         
             
@@ -303,9 +308,10 @@ def fit(
 
         elapsed = time.time() - epoch_start_time
 
-        print('-' * 89)
-        print(f'| end of epoch {epoch:3d} | time: {elapsed:5.2f}s | valid loss {val_loss:5.2f}')
-        print('-' * 89)
+        if verbose == 1:
+            print('-' * 89)
+            print(f'| end of epoch {epoch:3d} | time: {elapsed:5.2f}s | valid loss {val_loss:5.2f}')
+            print('-' * 89)
 
 
         checkpoint = {
