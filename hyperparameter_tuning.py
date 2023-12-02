@@ -42,55 +42,45 @@ def unflatten_tensors(flattened_tensor, original_shapes):
 def get_original_shapes(tensor_list):
     return [tensor.shape if tensor is not None else None for tensor in tensor_list]
 
+def train_lstm(parameters : dict, 
+                      split_value1 = 1993, 
+                      split_value2 = 2006,
+                      gender = 'both',
+                      raw_filename = 'Dataset/Mx_1x1_alt.txt',
+                      country = "PT", 
+                      seed = 0):
+    
+    random.seed(seed)
+    np.random.seed(seed)
+     
+    
+    # Control
+    #split_value = 2000
+    T_ = parameters['T']
+    tau0 = parameters['tau0']
+    split_value1 = split_value1 # 1993 a 2005 corresponde a 13 anos (13/66 approx. 20%)
+    split_value2 = split_value2 # 2006 a 2022 corresponde a 17 anos (17/83 approx. 20%)
+    gender = gender
+    both_gender_model = (gender == 'both')
+    checkpoint_dir = f'Saved_models/checkpoint_{gender}.pt'
+    best_model_dir = f'Saved_models/best_model_{gender}.pt'
 
 
-
-def gridSearch(parameters: dict, func_args: tuple):
-    # Get hyperparameter names and values
-    hyperparameter_names = list(parameters.keys())
-    hyperparameter_values = list(parameters.values())
-
-    # Generate all combinations of hyperparameter values
-    hyperparameter_combinations = list(product(*hyperparameter_values))
-    print('=' * 100)
-    print('=' * 100)
-    print(f'| Total Number of Trials: {len(hyperparameter_combinations)} |')
-    print('=' * 100)
-    print('=' * 100)
-    print('\n')
-
-    # Store the best hyperparameters and corresponding evaluation
-    best_hyperparameters = None
-    best_evaluation = float('-inf')  # Assuming higher is better
-
-    # Iterate through each hyperparameter combination
-    for i, combo in enumerate(hyperparameter_combinations):
-        # Create a dictionary with current hyperparameter values
-        current_hyperparameters = dict(zip(hyperparameter_names, combo))
-
-        # Train the model with current hyperparameters and get the evaluation on the validation set
-        print('-' * 100)
-        print(f'| Training combo number: {i+1}/{len(hyperparameter_combinations)} |')
-        print(f'| Hyperparameters:{combo} |')
-        current_evaluation = train_transformer(current_hyperparameters, *func_args)
-        print(f'| Current Avg. evaluation: {current_evaluation}')
-        print('-' * 100)
-        print('\n')
-
-        # Update the best hyperparameters if the current evaluation is better
-        if current_evaluation > best_evaluation:
-            best_evaluation = current_evaluation
-            best_hyperparameters = current_hyperparameters
-
-    print('\n')
-    print('=' * 100)
-    print('=' * 100)
-    print(f'| Best Parameters: {i+1}/{len(hyperparameter_combinations)} \n Best evaluation: {best_evaluation} |')
-    print('=' * 100)
-    print('=' * 100)
-
-    return best_hyperparameters, best_evaluation
-
+    # Model hyperparameters  
+    input_size = tau0
+    batch_first = True  
+    batch_size = parameters['batch_size']  
+    epochs = parameters['epochs']  
+    d_model = parameters['d_model']   
+    n_decoder_layers = parameters['n_decoder_layers']    
+    n_encoder_layers = parameters['n_encoder_layers']  
+    n_heads = parameters['n_heads']  
+    dropout_encoder = parameters['dropout_encoder'] 
+    dropout_decoder = parameters['dropout_decoder'] 
+    dropout_pos_enc = parameters['dropout_pos_enc'] 
+    dim_feedforward_encoder = parameters['dim_feedforward_encoder'] 
+    dim_feedforward_decoder = parameters['dim_feedforward_decoder']
+    num_predicted_features = 1
 
 def train_transformer(parameters : dict, 
                       split_value1 = 1993, 
@@ -261,6 +251,53 @@ def train_transformer(parameters : dict,
 
     elif gender == 'Female':
         return recursive_prediction_loss_female
+    
+
+def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transformer):
+    # Get hyperparameter names and values
+    hyperparameter_names = list(parameters.keys())
+    hyperparameter_values = list(parameters.values())
+
+    # Generate all combinations of hyperparameter values
+    hyperparameter_combinations = list(product(*hyperparameter_values))
+    print('\n')
+    print('=' * 100)
+    print('=' * 100)
+    print(f'| Total Number of Trials: {len(hyperparameter_combinations)} |')
+    print('=' * 100)
+    print('=' * 100)
+    print('\n')
+
+    # Store the best hyperparameters and corresponding evaluation
+    best_hyperparameters = None
+    best_evaluation = float('-inf')  # Assuming higher is better
+
+    # Iterate through each hyperparameter combination
+    for i, combo in enumerate(hyperparameter_combinations):
+        # Create a dictionary with current hyperparameter values
+        current_hyperparameters = dict(zip(hyperparameter_names, combo))
+
+        # Train the model with current hyperparameters and get the evaluation on the validation set
+        print('-' * 100)
+        print(f'| Training combo number: {i+1}/{len(hyperparameter_combinations)} |')
+        print(f'| Hyperparameters:{combo} |')
+        current_evaluation = func(current_hyperparameters, *func_args)
+        print(f'| Current Avg. evaluation: {current_evaluation}')
+        print('-' * 100)
+        print('\n')
+
+        # Update the best hyperparameters if the current evaluation is better
+        if current_evaluation > best_evaluation:
+            best_evaluation = current_evaluation
+            best_hyperparameters = current_hyperparameters
+
+    print('=' * 100)
+    print(f'| Best Parameters: {best_hyperparameters} |')
+    print(f'| Best evaluation: {best_evaluation} |')
+    print('=' * 100)
+
+    return best_hyperparameters, best_evaluation
+
     
     
 
