@@ -270,7 +270,7 @@ def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transf
 
     # Store the best hyperparameters and corresponding evaluation
     best_hyperparameters = None
-    best_evaluation = float('-inf')  # Assuming higher is better
+    best_evaluation = float('inf')  # Assuming higher is better
 
     # Iterate through each hyperparameter combination
     for i, combo in enumerate(hyperparameter_combinations):
@@ -287,7 +287,7 @@ def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transf
         print('\n')
 
         # Update the best hyperparameters if the current evaluation is better
-        if current_evaluation > best_evaluation:
+        if current_evaluation < best_evaluation:
             best_evaluation = current_evaluation
             best_hyperparameters = current_hyperparameters
 
