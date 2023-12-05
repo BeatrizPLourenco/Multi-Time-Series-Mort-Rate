@@ -15,10 +15,8 @@ from sklearn.model_selection import GridSearchCV
 from itertools import product
 import random
 import numpy as np
-seed = 0
-torch.manual_seed(seed)
-random.seed(seed)
-np.random.seed(seed)
+import json
+import pandas as pd
 
 
 
@@ -243,8 +241,11 @@ def train_transformer(parameters : dict,
     
     print('=' * 100)
 
+    #return {'male_mse:': recursive_prediction_loss_male,'female_mse:': recursive_prediction_loss_female}
+
+
     if gender == 'both':
-        return (recursive_prediction_loss_male + recursive_prediction_loss_female)/2
+        return (recursive_prediction_loss_male + recursive_prediction_loss_female)
     
     elif gender == 'Male':
         return recursive_prediction_loss_male
@@ -253,7 +254,7 @@ def train_transformer(parameters : dict,
         return recursive_prediction_loss_female
     
 
-def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transformer):
+def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transformer, model_name: str = 'model'):
     # Get hyperparameter names and values
     hyperparameter_names = list(parameters.keys())
     hyperparameter_values = list(parameters.values())
@@ -285,6 +286,13 @@ def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transf
         print(f'| Current Avg. evaluation: {current_evaluation}')
         print('-' * 100)
         print('\n')
+        
+        results = {'hyperparameters': current_hyperparameters, 
+                                        'evaluation': current_evaluation}
+        
+        pd.DataFrame(results).to_csv('results_hyperparameter_opt/hyperparameter_tuning_{model_name}_{current_hyperparameters}.csv', index=False)
+
+
 
         # Update the best hyperparameters if the current evaluation is better
         if current_evaluation < best_evaluation:
@@ -295,6 +303,11 @@ def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transf
     print(f'| Best Parameters: {best_hyperparameters} |')
     print(f'| Best evaluation: {best_evaluation} |')
     print('=' * 100)
+
+    best_results = {'hyperparameters': best_hyperparameters, 
+                                        'evaluation': best_evaluation}
+
+    pd.DataFrame(best_results).to_csv('results_hyperparameter_opt/hyperparameter_tuning_{model_name}_best_parameters.csv', index=False)
 
     return best_hyperparameters, best_evaluation
 

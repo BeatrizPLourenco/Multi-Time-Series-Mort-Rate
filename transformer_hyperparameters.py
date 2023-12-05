@@ -6,7 +6,6 @@ Created on Fri Oct 14 18:23:31 2022
 @author: beatrizlourenco
 """
 from hyperparameter_tuning import train_transformer, gridSearch
-from ray import tune
 from functools import partial
 import json
 
@@ -35,11 +34,8 @@ if __name__ == "__main__":
         'epochs' : [1]
     }
     best_hyperparameters_m, best_evaluation_m = gridSearch(config, 
-                                                       func_args = (split_value1, split_value2, gender, raw_filename, country))
+                                                       func_args = (split_value1, split_value2, gender, raw_filename, country), model_name ='male_transformer')
 
-    with open('Dataset/hyperparameter_tuning_male_transformer.txt', 'w') as convert_file: 
-        convert_file.write(json.dumps({'best_hyperparameters_m': best_hyperparameters_m, 
-                                       'best_evaluation_m': best_evaluation_m}))
 
     gender = 'Female'
     config = {
@@ -58,10 +54,8 @@ if __name__ == "__main__":
         'epochs' : [1]
     }
     best_hyperparameters_f, best_evaluation_f = gridSearch(config, 
-                                                       func_args = (split_value1, split_value2, gender, raw_filename, country))
-    with open('Dataset/hyperparameter_tuning_female_transformer.txt', 'w') as convert_file: 
-        convert_file.write(json.dumps({'best_hyperparameters_f': best_hyperparameters_f, 
-                                       'best_evaluation_f': best_evaluation_f}))
+                                                       func_args = (split_value1, split_value2, gender, raw_filename, country), model_name ='female_transformer')
+
 
     
     gender = 'both'
@@ -81,11 +75,8 @@ if __name__ == "__main__":
         'epochs' : [1]
     }
     best_hyperparameters_b, best_evaluation_b = gridSearch(config, 
-                                                       func_args = (split_value1, split_value2, gender, raw_filename, country))
-    
-    with open('Dataset/hyperparameter_tuning_both_gender_transformer.txt', 'w') as convert_file: 
-        convert_file.write(json.dumps({'best_hyperparameters_b': best_hyperparameters_b, 
-                                    'best_evaluation_b': best_evaluation_b}))
+                                                       func_args = (split_value1, split_value2, gender, raw_filename, country), model_name ='both_transformer')
+
 
 
 
