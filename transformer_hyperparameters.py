@@ -19,39 +19,40 @@ if __name__ == "__main__":
 
     gender = 'Male'
     config = {
-        'T' : [(7,3), (9,1)],
-        'tau0' : [3],
+        'T' : [(7,3), (9,1), (7,1)],
+        'tau0' : [3, 5],
         'batch_size' : [5],
         'd_model' : [4],
-        'n_decoder_layers' : [1],
-        'n_encoder_layers' : [1],
+        'n_decoder_layers' : [1, 2],
+        'n_encoder_layers' : [1, 2],
         'n_heads' : [1],
-        'dropout_encoder' : [0.2],
-        'dropout_decoder' : [0.2],
-        'dropout_pos_enc' : [0.2],
+        'dropout_encoder' : [0.1, 0.2],
+        'dropout_decoder' : [0.1, 0.2],
+        'dropout_pos_enc' : [0.1],
         'dim_feedforward_encoder' : [4],
         'dim_feedforward_decoder' : [4],
-        'epochs' : [1]
+        'epochs' : [200]
     }
+
     best_hyperparameters_m, best_evaluation_m = gridSearch(config, 
                                                        func_args = (split_value1, split_value2, gender, raw_filename, country), model_name ='male_transformer')
 
 
     gender = 'Female'
     config = {
-        'T' : [(7,3), (9,1)],
-        'tau0' : [3, 5, 7],
+        'T' : [(7,3), (9,1), (7,1)],
+        'tau0' : [3, 5],
         'batch_size' : [5],
         'd_model' : [4],
-        'n_decoder_layers' : [1],
-        'n_encoder_layers' : [1],
+        'n_decoder_layers' : [1, 2],
+        'n_encoder_layers' : [1, 2],
         'n_heads' : [1],
-        'dropout_encoder' : [0.2],
-        'dropout_decoder' : [0.2],
-        'dropout_pos_enc' : [0.2],
+        'dropout_encoder' : [0.1, 0.2],
+        'dropout_decoder' : [0.1, 0.2],
+        'dropout_pos_enc' : [0.1],
         'dim_feedforward_encoder' : [4],
         'dim_feedforward_decoder' : [4],
-        'epochs' : [1]
+        'epochs' : [200]
     }
     best_hyperparameters_f, best_evaluation_f = gridSearch(config, 
                                                        func_args = (split_value1, split_value2, gender, raw_filename, country), model_name ='female_transformer')
@@ -60,19 +61,19 @@ if __name__ == "__main__":
     
     gender = 'both'
     config = {
-        'T' : [(7,3), (9,1)],
-        'tau0' : [3, 5, 7],
+        'T' : [(7,3), (9,1), (7,1)],
+        'tau0' : [3, 5],
         'batch_size' : [5],
         'd_model' : [4],
-        'n_decoder_layers' : [1],
-        'n_encoder_layers' : [1],
+        'n_decoder_layers' : [1, 2],
+        'n_encoder_layers' : [1, 2],
         'n_heads' : [1],
-        'dropout_encoder' : [0.2, 0.1],
-        'dropout_decoder' : [0.2, 0.1],
-        'dropout_pos_enc' : [0.2, 0.1],
-        'dim_feedforward_encoder' : [4, 16],
-        'dim_feedforward_decoder' : [4, 16],
-        'epochs' : [1]
+        'dropout_encoder' : [0.1, 0.2],
+        'dropout_decoder' : [0.1, 0.2],
+        'dropout_pos_enc' : [0.1],
+        'dim_feedforward_encoder' : [4],
+        'dim_feedforward_decoder' : [4],
+        'epochs' : [200]
     }
     best_hyperparameters_b, best_evaluation_b = gridSearch(config, 
                                                        func_args = (split_value1, split_value2, gender, raw_filename, country), model_name ='both_transformer')

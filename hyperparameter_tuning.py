@@ -211,7 +211,7 @@ def train_transformer(parameters : dict,
             checkpoint_dir= checkpoint_dir,
             best_model_dir= best_model_dir,
             verbose = 0,
-            patience=1
+            patience=50
         )
     else:
         best_model, history = trt.load_best_model(model, best_model_dir= best_model_dir)
@@ -290,10 +290,10 @@ def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transf
         results = {'hyperparameters': current_hyperparameters, 
                                         'evaluation': current_evaluation}
         
-        pd.DataFrame(results).to_csv('results_hyperparameter_opt/hyperparameter_tuning_{model_name}_{current_hyperparameters}.csv', index=False)
+        pd.DataFrame(results).to_csv(f'results_hyperparameter_opt/hyperparameter_tuning_{model_name}_{list(current_hyperparameters.values())}.csv', index=False)
 
 
-
+     
         # Update the best hyperparameters if the current evaluation is better
         if current_evaluation < best_evaluation:
             best_evaluation = current_evaluation
@@ -307,7 +307,7 @@ def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transf
     best_results = {'hyperparameters': best_hyperparameters, 
                                         'evaluation': best_evaluation}
 
-    pd.DataFrame(best_results).to_csv('results_hyperparameter_opt/hyperparameter_tuning_{model_name}_best_parameters.csv', index=False)
+    pd.DataFrame(best_results).to_csv(f'results_hyperparameter_opt/hyperparameter_tuning_{model_name}_best_parameters.csv', index=False)
 
     return best_hyperparameters, best_evaluation
 
