@@ -34,8 +34,8 @@ if __name__ == "__main__":
         'epochs' : [200]
     }
 
-    best_hyperparameters_m, best_evaluation_m = gridSearch(config, 
-                                                       func_args = (split_value1, split_value2, gender, raw_filename, country), model_name ='male_transformer')
+    #best_hyperparameters_m, best_evaluation_m = gridSearch(config, 
+    #                                                   func_args = (split_value1, split_value2, gender, raw_filename, country), model_name ='male_transformer')
 
 
     gender = 'Female'
@@ -54,8 +54,8 @@ if __name__ == "__main__":
         'dim_feedforward_decoder' : [4],
         'epochs' : [200]
     }
-    best_hyperparameters_f, best_evaluation_f = gridSearch(config, 
-                                                       func_args = (split_value1, split_value2, gender, raw_filename, country), model_name ='female_transformer')
+    #best_hyperparameters_f, best_evaluation_f = gridSearch(config, 
+    #                                                   func_args = (split_value1, split_value2, gender, raw_filename, country), model_name ='female_transformer')
 
 
     
