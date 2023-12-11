@@ -15,8 +15,15 @@ from sklearn.model_selection import GridSearchCV
 from itertools import product
 import random
 import numpy as np
-import json
-import pandas as pd
+from LSTM_Keras import lstm_model
+from keras.callbacks import ModelCheckpoint
+from keras.callbacks import EarlyStopping
+from sklearn.metrics import mean_squared_error
+
+seed = 0
+torch.manual_seed(seed)
+random.seed(seed)
+np.random.seed(seed)
 
 
 
@@ -48,14 +55,21 @@ def train_lstm(parameters : dict,
                       country = "PT", 
                       seed = 0):
     
+    # Preprocessing
+    data = dtclean.get_country_data(country, filedir = raw_filename)
+    data_logmat = prt.data_to_logmat(data, gender)
+    xmin, xmax = prt.min_max_from_dataframe(data_logmat)
+    
+    # Split Data
+    training_data, validation_test_data  = dtclean.split_data(data, split_value1)
+    validation_data, testing_data  = dtclean.split_data(validation_test_data, split_value2) 
+    
     random.seed(seed)
     np.random.seed(seed)
      
     
     # Control
     #split_value = 2000
-    T_ = parameters['T']
-    tau0 = parameters['tau0']
     split_value1 = split_value1 # 1993 a 2005 corresponde a 13 anos (13/66 approx. 20%)
     split_value2 = split_value2 # 2006 a 2022 corresponde a 17 anos (17/83 approx. 20%)
     gender = gender
@@ -65,20 +79,51 @@ def train_lstm(parameters : dict,
 
 
     # Model hyperparameters  
-    input_size = tau0
-    batch_first = True  
-    batch_size = parameters['batch_size']  
-    epochs = parameters['epochs']  
-    d_model = parameters['d_model']   
-    n_decoder_layers = parameters['n_decoder_layers']    
-    n_encoder_layers = parameters['n_encoder_layers']  
-    n_heads = parameters['n_heads']  
-    dropout_encoder = parameters['dropout_encoder'] 
-    dropout_decoder = parameters['dropout_decoder'] 
-    dropout_pos_enc = parameters['dropout_pos_enc'] 
-    dim_feedforward_encoder = parameters['dim_feedforward_encoder'] 
-    dim_feedforward_decoder = parameters['dim_feedforward_decoder']
-    num_predicted_features = 1
+    T = parameters['T']
+    tau0 = parameters['tau0']
+    tau1 = parameters['tau1']
+    tau2 = parameters['tau2']
+    tau3 = parameters['tau3']
+
+    if gender == 'both':
+        train_data = prt.preprocessing_with_both_gendersLSTM(training_data, T, tau0,xmin, xmax)
+        val_data  = prt.preprocessing_with_both_gendersLSTM(validation_data, T, tau0,xmin, xmax)
+        test_data = prt.preprocessing_with_both_gendersLSTM(testing_data, T, tau0,xmin, xmax)
+
+
+    elif gender == 'Male' or gender == 'Female' :
+        train_data = prt.preprocessed_dataLSTM( training_data,  gender, T, tau0,xmin, xmax)
+        val_data = prt.preprocessed_dataLSTM( validation_data, gender, T, tau0,xmin, xmax)
+        test_data = prt.preprocessed_dataLSTM(testing_data, gender, T, tau0,xmin, xmax)
+
+
+    model = lstm_model(T, tau0, tau1, tau2, tau3, gender=gender)
+    filepath="./Model_checkpoints/uni_model_best_weights.hdf5"
+    #uni_model = both_gender_model(20,15,10)
+    #uni_model.compile(optimizer=Adam(learning_rate=0.001, beta_1= 0.9, beta_2=0.999, ), loss='mean_squared_error')
+    checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only = True)
+    earlystop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50) #addition of early stopping
+    callbacks_list = [checkpoint,earlystop]
+    if both_gender_model:
+        model.fit(x = train_data[:2], y = train_data[2], validation_split=0.2, epochs=1, batch_size=100, verbose = 0, callbacks=callbacks_list) # Model checkpoint CallBack
+    else:
+        model.fit(x = train_data[:1], y = train_data[2], validation_split=0.2, epochs=1, batch_size=100, verbose = 0, callbacks=callbacks_list) # Model checkpoint CallBack
+
+    first_year, last_year = split_value1, split_value2 -1
+    recursive_prediction = rf.recursive_forecast(data, first_year,last_year, T, tau0, xmin, xmax, model, batch_size=1, model_type = 'lstm')
+    recursive_prediction_loss_male, recursive_prediction_loss_female = rf.loss_recursive_forecasting(validation_data, recursive_prediction, gender_model = gender)
+
+    if gender == 'both':
+        return (recursive_prediction_loss_male + recursive_prediction_loss_female)/2
+    
+    elif gender == 'Male':
+        return recursive_prediction_loss_male
+
+    elif gender == 'Female':
+        return recursive_prediction_loss_female
+
+
+
 
 def train_transformer(parameters : dict, 
                       split_value1 = 1993, 
@@ -211,7 +256,7 @@ def train_transformer(parameters : dict,
             checkpoint_dir= checkpoint_dir,
             best_model_dir= best_model_dir,
             verbose = 0,
-            patience=50
+            patience=1
         )
     else:
         best_model, history = trt.load_best_model(model, best_model_dir= best_model_dir)
@@ -241,11 +286,8 @@ def train_transformer(parameters : dict,
     
     print('=' * 100)
 
-    #return {'male_mse:': recursive_prediction_loss_male,'female_mse:': recursive_prediction_loss_female}
-
-
     if gender == 'both':
-        return (recursive_prediction_loss_male + recursive_prediction_loss_female)
+        return (recursive_prediction_loss_male + recursive_prediction_loss_female)/2
     
     elif gender == 'Male':
         return recursive_prediction_loss_male
@@ -254,7 +296,7 @@ def train_transformer(parameters : dict,
         return recursive_prediction_loss_female
     
 
-def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transformer, model_name: str = 'model'):
+def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transformer):
     # Get hyperparameter names and values
     hyperparameter_names = list(parameters.keys())
     hyperparameter_values = list(parameters.values())
@@ -286,14 +328,7 @@ def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transf
         print(f'| Current Avg. evaluation: {current_evaluation}')
         print('-' * 100)
         print('\n')
-        
-        results = {'hyperparameters': current_hyperparameters, 
-                                        'evaluation': current_evaluation}
-        
-        pd.DataFrame(results).to_csv(f'results_hyperparameter_opt/hyperparameter_tuning_{model_name}_{list(current_hyperparameters.values())}.csv', index=False)
 
-
-     
         # Update the best hyperparameters if the current evaluation is better
         if current_evaluation < best_evaluation:
             best_evaluation = current_evaluation
@@ -303,11 +338,6 @@ def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transf
     print(f'| Best Parameters: {best_hyperparameters} |')
     print(f'| Best evaluation: {best_evaluation} |')
     print('=' * 100)
-
-    best_results = {'hyperparameters': best_hyperparameters, 
-                                        'evaluation': best_evaluation}
-
-    pd.DataFrame(best_results).to_csv(f'results_hyperparameter_opt/hyperparameter_tuning_{model_name}_best_parameters.csv', index=False)
 
     return best_hyperparameters, best_evaluation
 

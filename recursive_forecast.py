@@ -25,11 +25,16 @@ def get_mortality_dataframe_shell(
     gender_idx,
     model_pred_mx,
     model_pred_logmx,
+    model_type = 'tranformer',
     age_width: tuple = (0,100),
     sort_age: bool = True):
     
     age_range = range(age_width[0], age_width[1])
-    nb_genders = len(gender_idx.unique())
+    if model_type is 'transformer':
+        nb_genders = len(gender_idx.unique())
+    else:
+        nb_genders = len(np.unique(gender_idx))
+
 
     age_list = list(age_range) * nb_genders
     if sort_age: age_list.sort()
@@ -101,9 +106,10 @@ def recursive_forecast(
 
     last_obs_year = first_year-1
 
-    model.eval()
+    
 
     if model_type == 'transformer':
+        model.eval()
         timerange = T[0] + T[1]
     elif model_type == 'lstm':
         timerange = T
@@ -120,23 +126,21 @@ def recursive_forecast(
             xe, xd, ind = xe.squeeze(), xd.squeeze(1), ind.squeeze(1)
             ind_last_year = ind.squeeze(2)[:,-1]
         elif model_type == 'lstm': #REVER
-            x, ind, y = prt.preprocessing_with_both_gendersLSTM(mort, T, tau0, xmin, xmax, 1) 
-            x, ind = prt.from_numpy_to_torch((x, ind))
-            x, ind = x.squeeze(), ind.squeeze(1)
-            ind_last_year = ind.squeeze()
+            x, ind, y = prt.preprocessing_with_both_gendersLSTM(mort, T, tau0, xmin, xmax) 
 
         # Construction of prediction table for the test set:
         if model_type == 'transformer':
             model_forward = model(xe, xd, ind, enc_out_mask, dec_in_mask) #prediction of the model
             model_pred = model_forward.squeeze(2)[:,-1]
+            log_mx = (-model_pred) #substitution of real values for predicted ones
+            mx = torch.exp(-model_pred)
         elif model_type == 'lstm':
-            model_forward = model(x, ind)        
-            model_pred = model_forward.squeeze()
-        log_mx = (-model_pred) #substitution of real values for predicted ones
-        mx = torch.exp(-model_pred)
+            model_forward = np.array(model([x, ind])).flatten()   
+            log_mx = (-model_forward) #substitution of real values for predicted ones
+            mx = np.exp(-model_forward)
 
         #current year prediction on dictionary
-        predicted = get_mortality_dataframe_shell(year, ind_last_year, mx, log_mx)
+        predicted = get_mortality_dataframe_shell(year, ind, mx, log_mx, model_type = model_type)
 
         # Construction of dataframe for the values that we are going to keep for the next iteration
         mortality= pd.concat([mortality, predicted])
