@@ -160,31 +160,6 @@ def preprocessing_with_both_gendersLSTM(data, T, tau0,xmin, xmax):
     return x,gender_indicator, y
 
 
-
-def get_preprocessed_patterns(model_type:str, gender:str):
-    genders = {'Male', 'Female', 'both'}
-    assert gender in genders
-
-    models = {'Tranformer', 'lstm', 'gru'}
-    assert model_type in model_type
-
-    if model_type in {'Male', 'Female'}:
-        if model_type in {'Male', 'Female'}:
-            return (preprocessed_dataLSTM(data, 'Female', T, tau0,xmin, xmax))
-        
-        if model_type in {'both'}:
-            return (preprocessed_dataLSTM(data, 'Female', T, tau0,xmin, xmax))
-    
-    if model_type in {'Male', 'Female'}:
-        if model_type in {'Male', 'Female'}:
-            return (preprocessed_dataLSTM(data, 'Female', T, tau0,xmin, xmax))
-        
-        if model_type in {'both'}:
-            return (preprocessed_dataLSTM(data, 'Female', T, tau0,xmin, xmax))
-  
-
-
-
 def preprocessed_dataLSTM( data: Tensor, gender, T , tau0, xmin, xmax):
     logmat = data_to_logmat(data, gender)
     padd_train= padding(logmat, T, tau0)
@@ -224,26 +199,3 @@ def LSTM_input_shaping(padd_train,T,tau0):
         #print("shaped dataset: \n",xtrain)
     return xtrain,ytrain
 
-
-    """
-    t1 = padd_train.shape[0]-(T-1)-1
-    a1 = padd_train.shape[1]-(tau0-1)
-    n_train = t1 * a1 # number of training samples
-    n_batches = n_train // batch_size
-    delta0 = int(np.round((tau0-1)/2))
-
-    x = np.empty((n_batches, batch_size, T,tau0)) #shaping
-    x[:] = np.NaN 
-    y = np.empty((n_batches, batch_size)) #shaping
-    y[:] = np.NaN 
-
-    for t0 in range(0,t1):   # t=time, t0 = 0..39 => year 1950..1990      df_train_cbind.shape = 50,104
-        for a0 in range(0,a1): # a=age,  a0=0-99 a0 => age 0..99
-            pattern_idx = t0*a1 + a0
-            pattern_per_batch_idx = pattern_idx % batch_size
-            batch_idx = pattern_idx // batch_size 
-            
-            x[batch_idx, pattern_per_batch_idx,:,:] = padd_train.iloc[t0 : (t0 + T), a0 : (a0 + tau0)].copy()  # copy years from t0 to t9 and ages from a0 to a0+5 into xt_train [100*t0+a0, :, :]
-            y[batch_idx, pattern_per_batch_idx] = padd_train.iloc[(t0 + T), a0 + int(delta0) ].copy()  # copy years from t9 to t13 and ages from a0 to a0+5 into xt_train [100*t0+a0, :, :]
-        
-    return x, y"""

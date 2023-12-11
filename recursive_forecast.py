@@ -27,8 +27,10 @@ def get_mortality_dataframe_shell(
     model_pred_logmx,
     model_type = 'tranformer',
     age_width: tuple = (0,100),
-    sort_age: bool = True):
-    
+    sort_age: bool = True,
+    gender:str = None):
+    if model_type == 'lstm':
+        assert gender != None
     age_range = range(age_width[0], age_width[1])
     if model_type is 'transformer':
         nb_genders = len(gender_idx.unique())
@@ -41,8 +43,8 @@ def get_mortality_dataframe_shell(
 
     year_list = [year] * nb_genders * len(age_range)
     #gender_list = pd.Categorical(gender_idx.tolist()).rename_categories(['Female','Male'])
-
-    gender_list = pd.Categorical(gender_idx.tolist()).rename_categories({0:'Female',1:'Male'})
+    
+    gender_list = pd.Categorical(gender_idx.tolist()).rename_categories({0:'Female',1:'Male'}) if gender == None else gender
     model_pred_mx_list = model_pred_mx.tolist()
     model_pred_logmx_list = model_pred_logmx.tolist()
 
@@ -102,7 +104,8 @@ def recursive_forecast(
     enc_out_mask: torch.Tensor = None, 
     dec_in_mask: torch.Tensor = None, 
     columns: list = ['Year', 'Age','mx', 'logmx', 'Gender'],
-    model_type:str = 'transformer') -> pd.DataFrame:
+    model_type:str = 'transformer',
+    gender:str = None) -> pd.DataFrame:
 
     last_obs_year = first_year-1
 
@@ -126,7 +129,8 @@ def recursive_forecast(
             xe, xd, ind = xe.squeeze(), xd.squeeze(1), ind.squeeze(1)
             ind_last_year = ind.squeeze(2)[:,-1]
         elif model_type == 'lstm': #REVER
-            x, ind, y = prt.preprocessing_with_both_gendersLSTM(mort, T, tau0, xmin, xmax) 
+            assert gender != None
+            x, ind, y = prt.preprocessing_with_both_gendersLSTM(mort, T, tau0, xmin, xmax) if gender == 'both' else prt.preprocessed_dataLSTM(mort, gender, T, tau0, xmin, xmax)
 
         # Construction of prediction table for the test set:
         if model_type == 'transformer':
@@ -135,12 +139,13 @@ def recursive_forecast(
             log_mx = (-model_pred) #substitution of real values for predicted ones
             mx = torch.exp(-model_pred)
         elif model_type == 'lstm':
-            model_forward = np.array(model([x, ind])).flatten()   
+            inp = [x, ind] if gender == 'both' else x
+            model_forward = np.array(model(inp)).flatten()   
             log_mx = (-model_forward) #substitution of real values for predicted ones
             mx = np.exp(-model_forward)
 
         #current year prediction on dictionary
-        predicted = get_mortality_dataframe_shell(year, ind, mx, log_mx, model_type = model_type)
+        predicted = get_mortality_dataframe_shell(year, ind, mx, log_mx, model_type = model_type, gender = gender)
 
         # Construction of dataframe for the values that we are going to keep for the next iteration
         mortality= pd.concat([mortality, predicted])

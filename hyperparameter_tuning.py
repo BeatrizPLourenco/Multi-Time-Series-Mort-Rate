@@ -15,11 +15,12 @@ from sklearn.model_selection import GridSearchCV
 from itertools import product
 import random
 import numpy as np
-from LSTM_Keras import lstm_model
+from LSTM_Keras import rnn_model
 from keras.callbacks import ModelCheckpoint
 from keras.callbacks import EarlyStopping
 from sklearn.metrics import mean_squared_error
-
+import pandas as pd
+import time
 seed = 0
 torch.manual_seed(seed)
 random.seed(seed)
@@ -47,7 +48,7 @@ def unflatten_tensors(flattened_tensor, original_shapes):
 def get_original_shapes(tensor_list):
     return [tensor.shape if tensor is not None else None for tensor in tensor_list]
 
-def train_lstm(parameters : dict, 
+def train_rnn(parameters : dict, 
                       split_value1 = 1993, 
                       split_value2 = 2006,
                       gender = 'both',
@@ -66,7 +67,6 @@ def train_lstm(parameters : dict,
     
     random.seed(seed)
     np.random.seed(seed)
-     
     
     # Control
     #split_value = 2000
@@ -81,9 +81,10 @@ def train_lstm(parameters : dict,
     # Model hyperparameters  
     T = parameters['T']
     tau0 = parameters['tau0']
-    tau1 = parameters['tau1']
-    tau2 = parameters['tau2']
-    tau3 = parameters['tau3']
+    units_per_layer = parameters['units_per_layer']
+    rnn_func = parameters['rnn_func']
+    batch_size = parameters['batch_size']
+    epochs = parameters['epochs']
 
     if gender == 'both':
         train_data = prt.preprocessing_with_both_gendersLSTM(training_data, T, tau0,xmin, xmax)
@@ -97,20 +98,20 @@ def train_lstm(parameters : dict,
         test_data = prt.preprocessed_dataLSTM(testing_data, gender, T, tau0,xmin, xmax)
 
 
-    model = lstm_model(T, tau0, tau1, tau2, tau3, gender=gender)
-    filepath="./Model_checkpoints/uni_model_best_weights.hdf5"
+    model = rnn_model(T,tau0,  units_per_layer, rnn_func, gender=gender)
+    filepath = f"./Model_checkpoints/best_weights_rnn_{gender}_{time.time()}.hdf5"
     #uni_model = both_gender_model(20,15,10)
     #uni_model.compile(optimizer=Adam(learning_rate=0.001, beta_1= 0.9, beta_2=0.999, ), loss='mean_squared_error')
     checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only = True)
     earlystop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50) #addition of early stopping
     callbacks_list = [checkpoint,earlystop]
     if both_gender_model:
-        model.fit(x = train_data[:2], y = train_data[2], validation_split=0.2, epochs=1, batch_size=100, verbose = 0, callbacks=callbacks_list) # Model checkpoint CallBack
+        model.fit(x = train_data[:2], y = train_data[2], validation_split=0.2, epochs = epochs, batch_size = batch_size, verbose = 0, callbacks=callbacks_list) # Model checkpoint CallBack
     else:
-        model.fit(x = train_data[:1], y = train_data[2], validation_split=0.2, epochs=1, batch_size=100, verbose = 0, callbacks=callbacks_list) # Model checkpoint CallBack
+        model.fit(x = train_data[:1], y = train_data[2], validation_split=0.2, epochs = epochs, batch_size = batch_size, verbose = 0, callbacks=callbacks_list) # Model checkpoint CallBack
 
     first_year, last_year = split_value1, split_value2 -1
-    recursive_prediction = rf.recursive_forecast(data, first_year,last_year, T, tau0, xmin, xmax, model, batch_size=1, model_type = 'lstm')
+    recursive_prediction = rf.recursive_forecast(data, first_year,last_year, T, tau0, xmin, xmax, model, batch_size=1, model_type = 'lstm', gender = gender)
     recursive_prediction_loss_male, recursive_prediction_loss_female = rf.loss_recursive_forecasting(validation_data, recursive_prediction, gender_model = gender)
 
     if gender == 'both':
@@ -296,13 +297,20 @@ def train_transformer(parameters : dict,
         return recursive_prediction_loss_female
     
 
-def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transformer):
+def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transformer, model_name: str = 'model', folder = 'hyperparameters'):
+    file = f'{folder}/hyperparameter_tuning_{model_name}.csv'
+
     # Get hyperparameter names and values
     hyperparameter_names = list(parameters.keys())
     hyperparameter_values = list(parameters.values())
 
     # Generate all combinations of hyperparameter values
     hyperparameter_combinations = list(product(*hyperparameter_values))
+    dataframe = pd.DataFrame(hyperparameter_combinations, columns = hyperparameter_names)
+    dataframe['results'] = None
+    dataframe.to_csv(file, index=False)
+
+
     print('\n')
     print('=' * 100)
     print('=' * 100)
@@ -328,6 +336,11 @@ def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transf
         print(f'| Current Avg. evaluation: {current_evaluation}')
         print('-' * 100)
         print('\n')
+
+
+        dataframe.at[i, 'results'] = current_evaluation
+        dataframe.to_csv(file, index=False)
+
 
         # Update the best hyperparameters if the current evaluation is better
         if current_evaluation < best_evaluation:

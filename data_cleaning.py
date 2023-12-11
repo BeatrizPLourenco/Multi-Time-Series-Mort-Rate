@@ -91,7 +91,7 @@ def split_data(data: pd.DataFrame, split_value: int) -> tuple:
     _2nd_data = data[data['Year'] >= split_value]
     return _1st_data, _2nd_data
 
-def preprocessing_dataPT(data: pd.DataFrame):
+def preparing_dataPT(data: pd.DataFrame):
 
     """Restructures the portuguese dataset and inputs missing values. 
     
@@ -125,12 +125,16 @@ def get_country_data(country: str, filedir: str = None):
 
     if country not in filedir_dict.keys():
         raise Exception("Invalid Country selected!")
+    
+    if filedir == None:
+        assert path.exists(filedir_dict.get(country))
+        return pd.DataFrame(pd.read_excel(filedir_dict.get(country))) 
 
-    if not path.exists(filedir_dict.get(country)) or filedir != None:
+    else:
         assert path.exists(filedir)
         if country == "PT":
             data = pd.read_csv(filedir, header=None, sep='\s+', names=["Year", "Age", "mxf", "mxm", 'mxTotal'])
-            data = preprocessing_dataPT(data)
+            data = preparing_dataPT(data)
             data.to_excel(filedir_dict.get(country), index=False)
     
         elif country == 'SW':
@@ -139,8 +143,6 @@ def get_country_data(country: str, filedir: str = None):
         
         return data
 
-    else:
-        return pd.DataFrame(pd.read_excel(filedir_dict.get(country)))
 
         
 

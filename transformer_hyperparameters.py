@@ -9,8 +9,6 @@ from hyperparameter_tuning import train_transformer, gridSearch
 from functools import partial
 import json
 
-
-
 if __name__ == "__main__":
     split_value1 = 1993
     split_value2 = 2006 
