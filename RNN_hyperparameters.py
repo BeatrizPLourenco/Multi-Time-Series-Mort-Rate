@@ -12,6 +12,7 @@ from functools import partial
 from keras.layers import Dense, LSTM, Flatten, Concatenate, Bidirectional, GRU
 import json
 import time
+import pandas as pd
 
 if __name__ == "__main__":
     split_value1 = 1993
@@ -31,7 +32,11 @@ if __name__ == "__main__":
         'epochs': [500]
     }
 
-    gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_rnn, model_name =f'{gender}_{time.time()}_rnn')
+    gridSearch(parameters, 
+        func_args = (split_value1, split_value2, gender, raw_filename, country), 
+        func = train_rnn, 
+        model_name =f'{gender}_{time.time()}_rnn',
+        csv_to_fill = 'hyperparameters\hyperparameter_tuning_Female_1702314751.876638_rnn.csv')
 
     gender = 'Male'
 
@@ -44,7 +49,7 @@ if __name__ == "__main__":
         'epochs': [500]
     }
 
-    gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_rnn, model_name =f'{gender}_{time.time()}_rnn')
+    #gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_rnn, model_name =f'{gender}_{time.time()}_rnn')
 
     gender = 'both'
 
@@ -57,7 +62,7 @@ if __name__ == "__main__":
         'epochs': [500]
     }
 
-    gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_rnn, model_name =f'{gender}_{time.time()}_rnn')
+    #gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_rnn, model_name =f'{gender}_{time.time()}_rnn')
 
     
 

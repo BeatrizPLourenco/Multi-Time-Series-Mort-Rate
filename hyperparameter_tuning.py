@@ -19,8 +19,11 @@ from LSTM_Keras import rnn_model
 from keras.callbacks import ModelCheckpoint
 from keras.callbacks import EarlyStopping
 from sklearn.metrics import mean_squared_error
+from keras.layers import Dense, LSTM, Flatten, Concatenate, Bidirectional, GRU
 import pandas as pd
 import time
+import ast
+
 seed = 0
 torch.manual_seed(seed)
 random.seed(seed)
@@ -82,7 +85,7 @@ def train_rnn(parameters : dict,
     T = parameters['T']
     tau0 = parameters['tau0']
     units_per_layer = parameters['units_per_layer']
-    rnn_func = parameters['rnn_func']
+    rnn_func = LSTM
     batch_size = parameters['batch_size']
     epochs = parameters['epochs']
 
@@ -297,7 +300,7 @@ def train_transformer(parameters : dict,
         return recursive_prediction_loss_female
     
 
-def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transformer, model_name: str = 'model', folder = 'hyperparameters'):
+def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transformer, csv_to_fill: str = None, model_name: str = 'model', folder = 'hyperparameters'):
     file = f'{folder}/hyperparameter_tuning_{model_name}.csv'
 
     # Get hyperparameter names and values
@@ -305,10 +308,23 @@ def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transf
     hyperparameter_values = list(parameters.values())
 
     # Generate all combinations of hyperparameter values
-    hyperparameter_combinations = list(product(*hyperparameter_values))
-    dataframe = pd.DataFrame(hyperparameter_combinations, columns = hyperparameter_names)
-    dataframe['results'] = None
-    dataframe.to_csv(file, index=False)
+    
+
+    if csv_to_fill is None:
+        hyperparameter_combinations = list(product(*hyperparameter_values))
+        initial_idx = 0
+        dataframe = pd.DataFrame(hyperparameter_combinations, columns = hyperparameter_names)
+        dataframe['results'] = None
+        dataframe.to_csv(file, index=False)
+    
+    else:
+        file = csv_to_fill
+        dataframe = pd.read_csv(csv_to_fill)
+        dataframe['units_per_layer'] = dataframe['units_per_layer'].apply(ast.literal_eval)
+        initial_idx = len(dataframe[dataframe.results.notna()])
+        hyperparameter_combinations = dataframe[dataframe.results.isna()].drop(columns=['results']).values.tolist()
+        
+
 
 
     print('\n')
@@ -325,6 +341,8 @@ def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transf
 
     # Iterate through each hyperparameter combination
     for i, combo in enumerate(hyperparameter_combinations):
+        i =+ initial_idx
+
         # Create a dictionary with current hyperparameter values
         current_hyperparameters = dict(zip(hyperparameter_names, combo))
 
