@@ -22,6 +22,7 @@ from sklearn.metrics import mean_squared_error
 from keras.layers import Dense, LSTM, Flatten, Concatenate, Bidirectional, GRU
 import pandas as pd
 import time
+from datetime import datetime
 import ast
 
 seed = 0
@@ -102,9 +103,8 @@ def train_rnn(parameters : dict,
 
 
     model = rnn_model(T,tau0,  units_per_layer, rnn_func, gender=gender)
-    filepath = f"./Model_checkpoints/best_weights_rnn_{gender}_{time.time()}.hdf5"
-    #uni_model = both_gender_model(20,15,10)
-    #uni_model.compile(optimizer=Adam(learning_rate=0.001, beta_1= 0.9, beta_2=0.999, ), loss='mean_squared_error')
+    ts = datetime.now().strftime("%Y_%m_%d_%H_%M_%S.%f")[:-3]
+    filepath = "{epoch:02d}-{val_loss:.2f}.weights.h5"
     checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only = True)
     earlystop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50) #addition of early stopping
     callbacks_list = [checkpoint,earlystop]
@@ -341,14 +341,14 @@ def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transf
 
     # Iterate through each hyperparameter combination
     for i, combo in enumerate(hyperparameter_combinations):
-        i =+ initial_idx
+        j = i + initial_idx
 
         # Create a dictionary with current hyperparameter values
         current_hyperparameters = dict(zip(hyperparameter_names, combo))
 
         # Train the model with current hyperparameters and get the evaluation on the validation set
         print('-' * 100)
-        print(f'| Training combo number: {i+1}/{len(hyperparameter_combinations)} |')
+        print(f'| Training combo number: {i + initial_idx+1}/{len(hyperparameter_combinations + initial_idx)} |')
         print(f'| Hyperparameters:{combo} |')
         current_evaluation = func(current_hyperparameters, *func_args)
         print(f'| Current Avg. evaluation: {current_evaluation}')
@@ -356,7 +356,7 @@ def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transf
         print('\n')
 
 
-        dataframe.at[i, 'results'] = current_evaluation
+        dataframe.at[i + initial_idx, 'results'] = current_evaluation
         dataframe.to_csv(file, index=False)
 
 
