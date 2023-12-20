@@ -207,8 +207,6 @@ def preprocessed_data( data: Tensor, gender, T , tau0, xmin, xmax, batch_size, n
 def LSTM_input_shaping(padd_train,T,tau0):
     t1 = padd_train.shape[0]-(T-1)-1
     a1 = padd_train.shape[1]-(tau0-1)
-    #print(padd_train.shape)
-    #print(t1,a1)
     n_train = t1 * a1 # number of training samples
     delta0 = int(np.round((tau0-1)/2))
 

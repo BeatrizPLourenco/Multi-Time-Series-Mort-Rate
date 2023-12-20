@@ -52,6 +52,80 @@ def unflatten_tensors(flattened_tensor, original_shapes):
 def get_original_shapes(tensor_list):
     return [tensor.shape if tensor is not None else None for tensor in tensor_list]
 
+def train_gru(parameters : dict, 
+                      split_value1 = 1993, 
+                      split_value2 = 2006,
+                      gender = 'both',
+                      raw_filename = 'Dataset/Mx_1x1_alt.txt',
+                      country = "PT", 
+                      seed = 0):
+    
+    # Preprocessing
+    data = dtclean.get_country_data(country, filedir = raw_filename)
+    data_logmat = prt.data_to_logmat(data, gender)
+    xmin, xmax = prt.min_max_from_dataframe(data_logmat)
+    
+    # Split Data
+    training_data, validation_test_data  = dtclean.split_data(data, split_value1)
+    validation_data, testing_data  = dtclean.split_data(validation_test_data, split_value2) 
+    
+    random.seed(seed)
+    np.random.seed(seed)
+    
+    # Control
+    #split_value = 2000
+    split_value1 = split_value1 # 1993 a 2005 corresponde a 13 anos (13/66 approx. 20%)
+    split_value2 = split_value2 # 2006 a 2022 corresponde a 17 anos (17/83 approx. 20%)
+    gender = gender
+    both_gender_model = (gender == 'both')
+    checkpoint_dir = f'Saved_models/checkpoint_{gender}.pt'
+    best_model_dir = f'Saved_models/best_model_{gender}.pt'
+
+
+    # Model hyperparameters  
+    T = parameters['T']
+    tau0 = parameters['tau0']
+    units_per_layer = parameters['units_per_layer']
+    rnn_func = GRU
+    batch_size = parameters['batch_size']
+    epochs = parameters['epochs']
+
+    if gender == 'both':
+        train_data = prt.preprocessing_with_both_gendersLSTM(training_data, T, tau0,xmin, xmax)
+        val_data  = prt.preprocessing_with_both_gendersLSTM(validation_data, T, tau0,xmin, xmax)
+        test_data = prt.preprocessing_with_both_gendersLSTM(testing_data, T, tau0,xmin, xmax)
+
+
+    elif gender == 'Male' or gender == 'Female' :
+        train_data = prt.preprocessed_dataLSTM( training_data,  gender, T, tau0,xmin, xmax)
+        val_data = prt.preprocessed_dataLSTM( validation_data, gender, T, tau0,xmin, xmax)
+        test_data = prt.preprocessed_dataLSTM(testing_data, gender, T, tau0,xmin, xmax)
+
+
+    model = rnn_model(T,tau0,  units_per_layer, rnn_func, gender=gender)
+    ts = datetime.now().strftime("%Y_%m_%d_%H_%M_%S.%f")[:-3]
+    filepath = "{epoch:02d}-{val_loss:.2f}.weights.h5"
+    checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only = True)
+    earlystop = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50) #addition of early stopping
+    callbacks_list = [checkpoint,earlystop]
+    if both_gender_model:
+        model.fit(x = train_data[:2], y = train_data[2], validation_split=0.2, epochs = epochs, batch_size = batch_size, verbose = 0, callbacks=callbacks_list) # Model checkpoint CallBack
+    else:
+        model.fit(x = train_data[:1], y = train_data[2], validation_split=0.2, epochs = epochs, batch_size = batch_size, verbose = 0, callbacks=callbacks_list) # Model checkpoint CallBack
+
+    first_year, last_year = split_value1, split_value2 -1
+    recursive_prediction = rf.recursive_forecast(data, first_year,last_year, T, tau0, xmin, xmax, model, batch_size=1, model_type = 'lstm', gender = gender)
+    recursive_prediction_loss_male, recursive_prediction_loss_female = rf.loss_recursive_forecasting(validation_data, recursive_prediction, gender_model = gender)
+
+    if gender == 'both':
+        return (recursive_prediction_loss_male + recursive_prediction_loss_female)/2
+    
+    elif gender == 'Male':
+        return recursive_prediction_loss_male
+
+    elif gender == 'Female':
+        return recursive_prediction_loss_female
+
 def train_rnn(parameters : dict, 
                       split_value1 = 1993, 
                       split_value2 = 2006,
@@ -344,11 +418,11 @@ def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transf
         j = i + initial_idx
 
         # Create a dictionary with current hyperparameter values
-        current_hyperparameters = dict(zip(hyperparameter_names, combo))
+        current_hyperparameters = dict(zip(hyperparameter_names, combo))  
 
         # Train the model with current hyperparameters and get the evaluation on the validation set
         print('-' * 100)
-        print(f'| Training combo number: {i + initial_idx+1}/{len(hyperparameter_combinations + initial_idx)} |')
+        print(f'| Training combo number: {i + initial_idx+1}/{len(hyperparameter_combinations) + initial_idx} |')
         print(f'| Hyperparameters:{combo} |')
         current_evaluation = func(current_hyperparameters, *func_args)
         print(f'| Current Avg. evaluation: {current_evaluation}')

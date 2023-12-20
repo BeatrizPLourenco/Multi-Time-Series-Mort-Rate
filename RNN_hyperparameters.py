@@ -6,7 +6,7 @@ Created on Fri Oct 14 18:23:31 2022
 @author: beatrizlourenco
 """
 
-from hyperparameter_tuning import train_transformer, gridSearch, train_rnn
+from hyperparameter_tuning import train_transformer, gridSearch, train_rnn, train_gru
 #from ray import tune
 from functools import partial
 from keras.layers import Dense, LSTM, Flatten, Concatenate, Bidirectional, GRU
@@ -31,14 +31,27 @@ if __name__ == "__main__":
         'batch_size': [5, 50, 100],
         'epochs': [500]
     }
-
+    """
     gridSearch(parameters, 
         func_args = (split_value1, split_value2, gender, raw_filename, country), 
         func = train_rnn, 
         model_name =f'{gender}_{time.time()}_rnn',
-        csv_to_fill = 'hyperparameters\hyperparameter_tuning_Female_1702314751.876638_rnn.csv')
+        csv_to_fill = 'hyperparameters\hyperparameter_tuning_Female_1702314751.876638_rnn.csv')"""
 
     gender = 'Male'
+
+    parameters = {
+        'T': [8, 10, 12],
+        'tau0': [3, 5, 7],
+        'units_per_layer': [[5, 10, 15], [10, 15, 20], [10, 15], [15, 20]],
+        'rnn_func': [LSTM],
+        'batch_size': [5, 50, 100],
+        'epochs': [500]
+    }
+
+    #gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country ), func = train_rnn, model_name =f'{gender}_{time.time()}_rnn')
+
+    gender = 'both'
 
     parameters = {
         'T': [8, 10, 12],
@@ -63,6 +76,47 @@ if __name__ == "__main__":
     }
 
     #gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_rnn, model_name =f'{gender}_{time.time()}_rnn')
+
+    ###### -------------------------------------------------------------------------------------------------------------------------------------------- ###########
+
+    gender = 'Female'
+
+    parameters = {
+        'T': [8, 10, 12],
+        'tau0': [3, 5, 7],
+        'units_per_layer': [[5, 10, 15], [10, 15, 20], [10, 15], [15, 20]],
+        'rnn_func': [GRU],
+        'batch_size': [5, 50, 100],
+        'epochs': [1]
+    }
+
+    gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_gru, model_name =f'{gender}_{time.time()}_gru')
+
+    gender = 'Male'
+
+    parameters = {
+        'T': [8, 10, 12],
+        'tau0': [3, 5, 7],
+        'units_per_layer': [[5, 10, 15], [10, 15, 20], [10, 15], [15, 20]],
+        'gru_func': [GRU],
+        'batch_size': [5, 50, 100],
+        'epochs': [1]
+    }
+
+    gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_gru, model_name =f'{gender}_{time.time()}_gru')
+
+    gender = 'both'
+
+    parameters = {
+        'T': [8, 10, 12],
+        'tau0': [3, 5, 7],
+        'units_per_layer': [[5, 10, 15], [10, 15, 20], [10, 15], [15, 20]],
+        'gru_func': [GRU],
+        'batch_size': [5, 50, 100],
+        'epochs': [1]
+    }
+
+    gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_gru, model_name =f'{gender}_{time.time()}_gru')
 
     
 
