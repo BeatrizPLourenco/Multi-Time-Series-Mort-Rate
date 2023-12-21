@@ -1,0 +1,109 @@
+T,tau0,units_per_layer,rnn_func,batch_size,epochs,results
+8,3,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,14.0525
+8,3,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,2.5620000000000003
+8,3,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,1.9780000000000002
+8,3,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,1.6795
+8,3,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,3.2165
+8,3,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,3.053
+8,3,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,2.7965
+8,3,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,3.0700000000000003
+8,3,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,8.353
+8,3,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,2.755
+8,3,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,2.792
+8,3,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,1.1415
+8,5,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,18.985
+8,5,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,1.1075
+8,5,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,1.26
+8,5,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,5.8885000000000005
+8,5,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,6.538
+8,5,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,1.2295
+8,5,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,6.646000000000001
+8,5,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,1.347
+8,5,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,2.947
+8,5,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,2.0175
+8,5,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,3.3884999999999996
+8,5,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,2.3795
+8,7,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,2.383
+8,7,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,2.041
+8,7,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,1.1115
+8,7,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,2.3594999999999997
+8,7,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,1.9075
+8,7,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,3.9175
+8,7,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,1.2205
+8,7,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,5.0809999999999995
+8,7,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,118.025
+8,7,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,16.409
+8,7,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,1.4020000000000001
+8,7,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,2.0455
+10,3,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,3.7625
+10,3,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,6.842
+10,3,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,1.1875
+10,3,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,10.462499999999999
+10,3,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,2.6745
+10,3,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,8.545
+10,3,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,3.0825
+10,3,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,3.4699999999999998
+10,3,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,1.9224999999999999
+10,3,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,3.8120000000000003
+10,3,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,1.1765
+10,3,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,1.6524999999999999
+10,5,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,4.43
+10,5,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,6.723
+10,5,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,16.455
+10,5,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,1.4615
+10,5,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,1.24
+10,5,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,1.2345000000000002
+10,5,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,117.09
+10,5,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,117.2135
+10,5,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,118.767
+10,5,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,19.682
+10,5,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,4.8885000000000005
+10,5,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,5.432
+10,7,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,12.281
+10,7,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,2.338
+10,7,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,5.731
+10,7,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,5.897500000000001
+10,7,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,4.7285
+10,7,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,1.383
+10,7,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,117.09
+10,7,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,117.2135
+10,7,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,118.767
+10,7,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,2.342
+10,7,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,1.4740000000000002
+10,7,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,2.5885
+12,3,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,5.6385000000000005
+12,3,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,1.4344999999999999
+12,3,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,2.1605
+12,3,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,4.9435
+12,3,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,1.6260000000000001
+12,3,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,1.39
+12,3,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,2.055
+12,3,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,2.2305
+12,3,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,1.236
+12,3,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,3.3685
+12,3,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,7.399
+12,3,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,3.6134999999999997
+12,5,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,12.4725
+12,5,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,1.3245
+12,5,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,1.593
+12,5,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,5.2620000000000005
+12,5,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,1.358
+12,5,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,2.4355
+12,5,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,119.9985
+12,5,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,118.491
+12,5,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,119.4785
+12,5,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,7.6445
+12,5,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,1.246
+12,5,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,1.5905
+12,7,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,3.3895
+12,7,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,1.2814999999999999
+12,7,"[5, 10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,1.5795
+12,7,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,4.875
+12,7,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,1.237
+12,7,"[10, 15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,1.492
+12,7,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,119.9985
+12,7,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,118.491
+12,7,"[10, 15]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,119.4785
+12,7,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,5,500,5.0095
+12,7,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,50,500,2.031
+12,7,"[15, 20]",<class 'keras.layers.rnn.lstm.LSTM'>,100,500,3.4335

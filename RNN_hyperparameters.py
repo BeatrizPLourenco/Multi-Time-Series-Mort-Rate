@@ -75,7 +75,7 @@ if __name__ == "__main__":
         'epochs': [500]
     }
 
-    #gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_rnn, model_name =f'{gender}_{time.time()}_rnn')
+    gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_rnn, model_name =f'{gender}_{time.time()}_rnn')
 
     ###### -------------------------------------------------------------------------------------------------------------------------------------------- ###########
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
         'units_per_layer': [[5, 10, 15], [10, 15, 20], [10, 15], [15, 20]],
         'rnn_func': [GRU],
         'batch_size': [5, 50, 100],
-        'epochs': [1]
+        'epochs': [500]
     }
 
     gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_gru, model_name =f'{gender}_{time.time()}_gru')
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         'units_per_layer': [[5, 10, 15], [10, 15, 20], [10, 15], [15, 20]],
         'gru_func': [GRU],
         'batch_size': [5, 50, 100],
-        'epochs': [1]
+        'epochs': [500]
     }
 
     gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_gru, model_name =f'{gender}_{time.time()}_gru')
@@ -113,7 +113,7 @@ if __name__ == "__main__":
         'units_per_layer': [[5, 10, 15], [10, 15, 20], [10, 15], [15, 20]],
         'gru_func': [GRU],
         'batch_size': [5, 50, 100],
-        'epochs': [1]
+        'epochs': [500]
     }
 
     gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_gru, model_name =f'{gender}_{time.time()}_gru')
