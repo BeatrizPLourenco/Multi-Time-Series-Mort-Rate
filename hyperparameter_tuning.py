@@ -334,7 +334,7 @@ def train_transformer(parameters : dict,
             checkpoint_dir= checkpoint_dir,
             best_model_dir= best_model_dir,
             verbose = 0,
-            patience=5
+            patience = 50
         )
     else:
         best_model, history = trt.load_best_model(model, best_model_dir= best_model_dir)

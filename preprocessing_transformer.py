@@ -113,7 +113,6 @@ def preprocessing_with_both_genders(data, T, tau0,xmin, xmax, batch_size = 5, nu
     T_encoder = T[0]
     T_decoder = T[1]
 
-    dimensions = (d * 2, batch_size, T[0], T[1])
 
 
     d = data0[0].shape[0]

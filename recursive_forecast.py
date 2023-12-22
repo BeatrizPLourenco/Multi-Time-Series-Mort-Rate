@@ -20,6 +20,39 @@ def get_data_in_time_range(data: pd.DataFrame, first_year: int = None, last_year
 
     return new_data
 
+import pandas as pd
+import numpy as np
+
+def get_mortality_dataframe_shell(year, gender_idx, model_pred_mx, model_pred_logmx, model_type='transformer', age_width=(0, 100), sort_age=True, gender=None):
+    if model_type == 'lstm':
+        assert gender is not None
+
+    age_range = range(age_width[0], age_width[1])
+
+    if model_type == 'transformer':
+
+        if gender_idx is None:
+            nb_genders = 1
+        else:
+            nb_genders = 2
+            gender_idx = [int(gender_idx[i][0]) for i in range(len(gender_idx))]
+            gender_idx = np.array(gender_idx)
+
+    elif model_type == 'lstm':
+        nb_genders = len(np.unique(gender_idx))
+
+    age_list = sorted(list(age_range) * nb_genders) if sort_age else list(age_range) * nb_genders
+    year_list = [year] * nb_genders * len(age_range)
+
+    if gender == 'both':
+        gender_list = pd.Categorical(gender_idx.tolist()).rename_categories({0: 'Female', 1: 'Male'})
+    
+    else:
+        gender_list = [gender] * nb_genders  * len(age_range)
+
+    return pd.DataFrame({'Year': year_list, 'Age': age_list, 'Gender': gender_list, 'mx': model_pred_mx.tolist(), 'logmx': model_pred_logmx.tolist()})
+
+"""
 def get_mortality_dataframe_shell( 
     year,
     gender_idx,
@@ -50,7 +83,7 @@ def get_mortality_dataframe_shell(
     model_pred_mx_list = model_pred_mx.tolist()
     model_pred_logmx_list = model_pred_logmx.tolist()
 
-    return pd.DataFrame({ 'Year': year_list, 'Age': age_list, 'Gender': gender_list, 'mx': model_pred_mx_list, 'logmx': model_pred_logmx_list })
+    return pd.DataFrame({ 'Year': year_list, 'Age': age_list, 'Gender': gender_list, 'mx': model_pred_mx_list, 'logmx': model_pred_logmx_list })"""
 
 def recursive_forecast_both_genders(data,first_year,last_year,T,tau0, xmin, xmax, model, gender = 'Both'):
   with torch.no_grad():
@@ -126,10 +159,11 @@ def recursive_forecast(
     for  year in range(last_obs_year+1, last_year+1): # The next year is recursively predicted 
         mort = get_data_in_time_range(mortality, first_year = year-timerange-1) #selection of only the last timerange years
         if model_type == 'transformer':
-            xe, xd, ind, yd = prt.preprocessing_with_both_genders(mort, T, tau0, xmin, xmax, 1, 1) 
+            xe, xd, ind, yd = prt.preprocessing_with_both_genders(mort, T, tau0, xmin, xmax, 1, 1) if gender == 'both' else prt.preprocessed_data(mort, gender, T, tau0, xmin, xmax, 1, 1)
             xe, xd, ind = prt.from_numpy_to_torch((xe, xd, ind))
-            xe, xd, ind = xe.squeeze(), xd.squeeze(1), ind.squeeze(1)
-            ind_last_year = ind.squeeze(2)[:,-1]
+            xe, xd = xe.squeeze(), xd.squeeze(1)
+            ind = ind.squeeze(1) if ind is not None else ind
+            #ind_last_year = ind.squeeze(2)[:,-1]
         elif model_type == 'lstm': #REVER
             assert gender != None
             x, ind, y = prt.preprocessing_with_both_gendersLSTM(mort, T, tau0, xmin, xmax) if gender == 'both' else prt.preprocessed_dataLSTM(mort, gender, T, tau0, xmin, xmax)

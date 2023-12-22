@@ -20,27 +20,6 @@ if __name__ == "__main__":
     raw_filename = 'Dataset/Mx_1x1_alt_1940_2022.txt'
 
     country = "PT"
-    ###### -------------------------------------------------------------------------------------------------------------------------------------------- ###########
-
-    gender = 'Male'
-
-    parameters= {
-        'T': [8, 10],
-        'tau0': [3, 5],
-        'units_per_layer': [[5, 10, 15], [10, 15, 20], [10, 15]],
-        'rnn_func': [GRU],
-        'batch_size': [5, 50],
-        'epochs': [500]
-    }
-
-
-    gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_gru, model_name =f'{gender}_{time.time()}_gru_NEW')
-
-    gender = 'both'
-
-    gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_gru, model_name =f'{gender}_{time.time()}_gru_NEW')
-
-    ###### -------------------------------------------------------------------------------------------------------------------------------------------- ###########
 
     gender = 'both'
     config = {
@@ -54,19 +33,20 @@ if __name__ == "__main__":
         'dropout_encoder' : [0.1, 0.2],
         'dropout_decoder' : [0.1, 0.2],
         'dropout_pos_enc' : [0.1],
-        'dim_feedforward_encoder' : [4],
+        'dim_feedforward_encoder' : [4], 
         'dim_feedforward_decoder' : [4],
         'epochs' : [200]
     }
-    best_hyperparameters_b, best_evaluation_b = gridSearch(config,  func_args = (split_value1, split_value2, gender, raw_filename, country), model_name =f'{gender}_{time.time()}_transformer')
+    #gender = 'both'
+    #best_hyperparameters_b, best_evaluation_b = gridSearch(config,  func_args = (split_value1, split_value2, gender, raw_filename, country), model_name =f'{gender}_{time.time()}_transformer_NEW')
+    
+    gender = 'Female'
+    best_hyperparameters_b, best_evaluation_b = gridSearch(config,  func_args = (split_value1, split_value2, gender, raw_filename, country), model_name =f'{gender}_{time.time()}_transformer_NEW')
 
     gender = 'Male'
-    best_hyperparameters_b, best_evaluation_b = gridSearch(config,  func_args = (split_value1, split_value2, gender, raw_filename, country), model_name =f'{gender}_{time.time()}_transformer')
+    best_hyperparameters_b, best_evaluation_b = gridSearch(config,  func_args = (split_value1, split_value2, gender, raw_filename, country), model_name =f'{gender}_{time.time()}_transformer_NEW')
 
-    gender = 'Female'
-    best_hyperparameters_b, best_evaluation_b = gridSearch(config,  func_args = (split_value1, split_value2, gender, raw_filename, country), model_name =f'{gender}_{time.time()}_transformer')
-
-
+    
 
     
 
