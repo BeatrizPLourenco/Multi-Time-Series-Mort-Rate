@@ -394,7 +394,7 @@ def gridSearch(parameters: dict, func_args: tuple, func: callable = train_transf
     else:
         file = csv_to_fill
         dataframe = pd.read_csv(csv_to_fill)
-        dataframe['units_per_layer'] = dataframe['units_per_layer'].apply(ast.literal_eval)
+        #dataframe['units_per_layer'] = dataframe['units_per_layer'].apply(ast.literal_eval)
         initial_idx = len(dataframe[dataframe.results.notna()])
         hyperparameter_combinations = dataframe[dataframe.results.isna()].drop(columns=['results']).values.tolist()
         
