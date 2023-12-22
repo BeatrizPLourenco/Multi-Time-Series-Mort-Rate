@@ -1,0 +1,25 @@
+T,tau0,units_per_layer,batch_size,epochs,rnn_func,results
+8,3,"[5, 10, 15]",5,500,<class 'keras.layers.rnn.lstm.LSTM'>,0.668
+8,3,"[5, 10, 15]",50,500,<class 'keras.layers.rnn.lstm.LSTM'>,1.979
+8,3,"[10, 15, 20]",5,500,<class 'keras.layers.rnn.lstm.LSTM'>,12.332
+8,3,"[10, 15, 20]",50,500,<class 'keras.layers.rnn.lstm.LSTM'>,13.715
+8,3,"[10, 15]",5,500,<class 'keras.layers.rnn.lstm.LSTM'>,11.064
+8,3,"[10, 15]",50,500,<class 'keras.layers.rnn.lstm.LSTM'>,10.681
+8,5,"[5, 10, 15]",5,500,<class 'keras.layers.rnn.lstm.LSTM'>,2.699
+8,5,"[5, 10, 15]",50,500,<class 'keras.layers.rnn.lstm.LSTM'>,3.276
+8,5,"[10, 15, 20]",5,500,<class 'keras.layers.rnn.lstm.LSTM'>,10.284
+8,5,"[10, 15, 20]",50,500,<class 'keras.layers.rnn.lstm.LSTM'>,21.775
+8,5,"[10, 15]",5,500,<class 'keras.layers.rnn.lstm.LSTM'>,14.386
+8,5,"[10, 15]",50,500,<class 'keras.layers.rnn.lstm.LSTM'>,3.185
+10,3,"[5, 10, 15]",5,500,<class 'keras.layers.rnn.lstm.LSTM'>,0.915
+10,3,"[5, 10, 15]",50,500,<class 'keras.layers.rnn.lstm.LSTM'>,4.685
+10,3,"[10, 15, 20]",5,500,<class 'keras.layers.rnn.lstm.LSTM'>,0.93
+10,3,"[10, 15, 20]",50,500,<class 'keras.layers.rnn.lstm.LSTM'>,1.001
+10,3,"[10, 15]",5,500,<class 'keras.layers.rnn.lstm.LSTM'>,2.56
+10,3,"[10, 15]",50,500,<class 'keras.layers.rnn.lstm.LSTM'>,0.863
+10,5,"[5, 10, 15]",5,500,<class 'keras.layers.rnn.lstm.LSTM'>,0.722
+10,5,"[5, 10, 15]",50,500,<class 'keras.layers.rnn.lstm.LSTM'>,3.081
+10,5,"[10, 15, 20]",5,500,<class 'keras.layers.rnn.lstm.LSTM'>,1.815
+10,5,"[10, 15, 20]",50,500,<class 'keras.layers.rnn.lstm.LSTM'>,1.005
+10,5,"[10, 15]",5,500,<class 'keras.layers.rnn.lstm.LSTM'>,96.239
+10,5,"[10, 15]",50,500,<class 'keras.layers.rnn.lstm.LSTM'>,96.337

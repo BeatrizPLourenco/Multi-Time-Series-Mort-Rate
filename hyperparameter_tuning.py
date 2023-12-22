@@ -334,14 +334,14 @@ def train_transformer(parameters : dict,
             checkpoint_dir= checkpoint_dir,
             best_model_dir= best_model_dir,
             verbose = 0,
-            patience=1
+            patience=5
         )
     else:
         best_model, history = trt.load_best_model(model, best_model_dir= best_model_dir)
         
     
     first_year, last_year = split_value1, split_value2 -1
-    recursive_prediction = rf.recursive_forecast(data, first_year,last_year, (T_encoder, T_decoder), tau0, xmin, xmax, model, batch_size, xe_mask, tgt_mask)
+    recursive_prediction = rf.recursive_forecast(data, first_year,last_year, (T_encoder, T_decoder), tau0, xmin, xmax, model, batch_size, xe_mask, tgt_mask, gender=gender)
     recursive_prediction_loss_male, recursive_prediction_loss_female = rf.loss_recursive_forecasting(validation_data, recursive_prediction, gender_model = gender)
 
     trt.save_plots(history['train_loss_history'], history['val_loss_history'], gender = gender)

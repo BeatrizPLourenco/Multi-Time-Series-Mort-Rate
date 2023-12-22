@@ -29,60 +29,60 @@ T,tau0,units_per_layer,rnn_func,batch_size,epochs,results
 8,7,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,21.132
 8,7,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,2.294
 8,7,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,1.294
-8,7,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-8,7,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-8,7,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
-8,7,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-8,7,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-8,7,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
-10,3,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-10,3,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-10,3,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
-10,3,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-10,3,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-10,3,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
-10,3,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-10,3,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-10,3,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
-10,3,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-10,3,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-10,3,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
-10,5,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-10,5,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-10,5,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
-10,5,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-10,5,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-10,5,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
-10,5,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-10,5,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-10,5,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
-10,5,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-10,5,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-10,5,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
-10,7,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-10,7,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-10,7,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
-10,7,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-10,7,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-10,7,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
-10,7,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-10,7,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-10,7,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
-10,7,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-10,7,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-10,7,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
-12,3,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-12,3,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-12,3,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
-12,3,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-12,3,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-12,3,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
-12,3,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-12,3,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-12,3,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
-12,3,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
-12,3,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
-12,3,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,
+8,7,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,9.975
+8,7,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,2.191
+8,7,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,8.303
+8,7,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,1.129
+8,7,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,4.893
+8,7,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,0.656
+10,3,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,2.186
+10,3,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,1.675
+10,3,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,0.681
+10,3,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,5.799
+10,3,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,0.631
+10,3,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,7.358
+10,3,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,1.817
+10,3,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,7.066
+10,3,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,4.127
+10,3,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,0.773
+10,3,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,12.799
+10,3,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,2.839
+10,5,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,1.23
+10,5,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,6.543
+10,5,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,0.713
+10,5,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,3.805
+10,5,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,4.603
+10,5,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,0.715
+10,5,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,0.792
+10,5,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,0.664
+10,5,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,1.191
+10,5,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,1.101
+10,5,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,6.021
+10,5,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,0.64
+10,7,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,0.749
+10,7,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,3.027
+10,7,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,2.253
+10,7,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,0.633
+10,7,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,9.847
+10,7,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,0.69
+10,7,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,12.591
+10,7,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,0.877
+10,7,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,2.283
+10,7,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,1.796
+10,7,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,2.198
+10,7,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,6.761
+12,3,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,10.215
+12,3,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,2.257
+12,3,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,2.579
+12,3,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,24.519
+12,3,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,30.486
+12,3,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,3.231
+12,3,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,1.579
+12,3,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,3.956
+12,3,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,2.834
+12,3,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,22.453
+12,3,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,6.787
+12,3,"[15, 20]",<class 'keras.layers.rnn.gru.GRU'>,100,500,0.711
 12,5,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,
 12,5,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,
 12,5,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,100,500,

@@ -43,6 +43,8 @@ def get_mortality_dataframe_shell(
 
     year_list = [year] * nb_genders * len(age_range)
     #gender_list = pd.Categorical(gender_idx.tolist()).rename_categories(['Female','Male'])
+    gender_idx = [int(gender_idx[i][0]) for i in range(len(gender_idx))] if model_type == 'transformer' else gender_idx
+    gender_idx = np.array(gender_idx )
     
     gender_list = pd.Categorical(gender_idx.tolist()).rename_categories({0:'Female',1:'Male'}) if gender == 'both' else gender
     model_pred_mx_list = model_pred_mx.tolist()

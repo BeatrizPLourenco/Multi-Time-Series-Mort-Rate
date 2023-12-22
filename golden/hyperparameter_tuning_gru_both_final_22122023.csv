@@ -1,0 +1,25 @@
+T,tau0,units_per_layer,rnn_func,batch_size,epochs,results
+8,3,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,1.5885
+8,3,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,5.3265
+8,3,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,1.964
+8,3,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,8.118
+8,3,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,2.383
+8,3,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,1.854
+8,5,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,4.2705
+8,5,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,7.215999999999999
+8,5,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,1.685
+8,5,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,9.028
+8,5,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,2.2065
+8,5,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,2.0225
+10,3,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,1.626
+10,3,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,2.9530000000000003
+10,3,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,2.643
+10,3,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,5.1325
+10,3,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,1.5265
+10,3,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,4.227
+10,5,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,33.7795
+10,5,"[5, 10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,1.264
+10,5,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,5,500,15.160499999999999
+10,5,"[10, 15, 20]",<class 'keras.layers.rnn.gru.GRU'>,50,500,7.023
+10,5,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,5,500,43.9745
+10,5,"[10, 15]",<class 'keras.layers.rnn.gru.GRU'>,50,500,3.557

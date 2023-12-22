@@ -75,7 +75,7 @@ if __name__ == "__main__":
         'epochs': [500]
     }
 
-    gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_rnn, model_name =f'{gender}_{time.time()}_rnn')
+    #gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_rnn, model_name =f'{gender}_{time.time()}_rnn')
 
     ###### -------------------------------------------------------------------------------------------------------------------------------------------- ###########
 
@@ -87,20 +87,20 @@ if __name__ == "__main__":
         'units_per_layer': [[5, 10, 15], [10, 15, 20], [10, 15], [15, 20]],
         'rnn_func': [GRU],
         'batch_size': [5, 50, 100],
-        'epochs': [500]
+        'epochs': [1]
     }
 
-    gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_gru, model_name =f'{gender}_{time.time()}_gru')
+    #gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_gru, model_name =f'{gender}_{time.time()}_gru')
 
     gender = 'Male'
 
     parameters = {
-        'T': [8, 10, 12],
-        'tau0': [3, 5, 7],
-        'units_per_layer': [[5, 10, 15], [10, 15, 20], [10, 15], [15, 20]],
+        'T': [8, 10],
+        'tau0': [3, 5],
+        'units_per_layer': [[5, 10, 15], [10, 15]],
         'gru_func': [GRU],
         'batch_size': [5, 50, 100],
-        'epochs': [500]
+        'epochs': [1]
     }
 
     gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_gru, model_name =f'{gender}_{time.time()}_gru')
@@ -108,15 +108,35 @@ if __name__ == "__main__":
     gender = 'both'
 
     parameters = {
-        'T': [8, 10, 12],
-        'tau0': [3, 5, 7],
-        'units_per_layer': [[5, 10, 15], [10, 15, 20], [10, 15], [15, 20]],
+        'T': [8, 10],
+        'tau0': [3, 5],
+        'units_per_layer': [[5, 10, 15], [10, 15]],
         'gru_func': [GRU],
-        'batch_size': [5, 50, 100],
-        'epochs': [500]
+        'batch_size': [5, 50],
+        'epochs': [1]
     }
 
     gridSearch(parameters, func_args = (split_value1, split_value2, gender, raw_filename, country), func = train_gru, model_name =f'{gender}_{time.time()}_gru')
+
+    gender = 'both'
+    config = {
+        'T' : [(7,3), (9,1)],
+        'tau0' : [3, 5],
+        'batch_size' : [5],
+        'd_model' : [4],
+        'n_decoder_layers' : [2],
+        'n_encoder_layers' : [1, 2],
+        'n_heads' : [1],
+        'dropout_encoder' : [0.1, 0.2],
+        'dropout_decoder' : [0.1, 0.2],
+        'dropout_pos_enc' : [0.1],
+        'dim_feedforward_encoder' : [4],
+        'dim_feedforward_decoder' : [4],
+        'epochs' : [1]
+    }
+    best_hyperparameters_b, best_evaluation_b = gridSearch(config,  func_args = (split_value1, split_value2, gender, raw_filename, country), model_name ='both_transformer')
+
+
 
     
 
