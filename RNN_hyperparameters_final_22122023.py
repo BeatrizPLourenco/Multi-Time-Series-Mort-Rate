@@ -13,6 +13,7 @@ from keras.layers import Dense, LSTM, Flatten, Concatenate, Bidirectional, GRU
 import json
 import time
 import pandas as pd
+import ast
 
 if __name__ == "__main__":
     split_value1 = 1993
@@ -38,7 +39,9 @@ if __name__ == "__main__":
         'epochs' : [200]
     }
 
-    dataframe = 'hyperparameters/hyperparameter_tuning_Male_1703257618.0138235_transformer_NEW.csv'
+    file = 'hyperparameters/hyperparameter_tuning_Male_1703257618.0138235_transformer_NEW.csv'
+    dataframe = pd.read_csv(file)
+    dataframe['T'] = dataframe['T'].apply(ast.literal_eval)
     gender = 'Male'
     best_hyperparameters_b, best_evaluation_b = gridSearch(config,  func_args = (split_value1, split_value2, gender, raw_filename, country), model_name =f'{gender}_{time.time()}_transformer_NEW', csv_to_fill = dataframe)
 
