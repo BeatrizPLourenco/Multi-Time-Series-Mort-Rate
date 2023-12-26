@@ -341,7 +341,7 @@ def train_transformer(parameters : dict,
         
     
     first_year, last_year = split_value1, split_value2 -1
-    recursive_prediction = rf.recursive_forecast(data, first_year,last_year, (T_encoder, T_decoder), tau0, xmin, xmax, model, batch_size, xe_mask, tgt_mask, gender=gender)
+    recursive_prediction = rf.recursive_forecast(data, first_year,last_year, (T_encoder, T_decoder), tau0, xmin, xmax, best_model, batch_size, xe_mask, tgt_mask, gender=gender)
     recursive_prediction_loss_male, recursive_prediction_loss_female = rf.loss_recursive_forecasting(validation_data, recursive_prediction, gender_model = gender)
 
     trt.save_plots(history['train_loss_history'], history['val_loss_history'], gender = gender)

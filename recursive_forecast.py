@@ -35,8 +35,9 @@ def get_mortality_dataframe_shell(year, gender_idx, model_pred_mx, model_pred_lo
             nb_genders = 1
         else:
             nb_genders = 2
-            gender_idx = [int(gender_idx[i][0]) for i in range(len(gender_idx))]
-            gender_idx = np.array(gender_idx)
+            #gender_idx = [int(gender_idx[i][0]) for i in range(len(gender_idx))]
+            #gender_idx = np.array(gender_idx)
+            gender_idx = gender_idx.numpy()
 
     elif model_type == 'lstm':
         nb_genders = len(np.unique(gender_idx))
@@ -163,7 +164,7 @@ def recursive_forecast(
             xe, xd, ind = prt.from_numpy_to_torch((xe, xd, ind))
             xe, xd = xe.squeeze(), xd.squeeze(1)
             ind = ind.squeeze(1) if ind is not None else ind
-            #ind_last_year = ind.squeeze(2)[:,-1]
+            ind_last_year = ind.squeeze(2)[:,-1]
         elif model_type == 'lstm': #REVER
             assert gender != None
             x, ind, y = prt.preprocessing_with_both_gendersLSTM(mort, T, tau0, xmin, xmax) if gender == 'both' else prt.preprocessed_dataLSTM(mort, gender, T, tau0, xmin, xmax)
@@ -174,6 +175,7 @@ def recursive_forecast(
             model_pred = model_forward.squeeze(2)[:,-1]
             log_mx = (-model_pred) #substitution of real values for predicted ones
             mx = torch.exp(-model_pred)
+            ind = ind_last_year
         elif model_type == 'lstm':
             inp = [x, ind] if gender == 'both' else x
             model_forward = np.array(model(inp)).flatten()   
