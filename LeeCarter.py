@@ -121,13 +121,16 @@ def viz_kt_graph(kt: np.array, kt_forecasts: dict, x_axis_train_values: np.array
 if __name__ == '__main__':
     country = "PT"
     split_value = 2000
+    split_value1 = 1993
+    split_value2 = 2006
     gender = 'Male'
     data = dtclean.get_country_data(country)
     data_by_gender = dtclean.get_data_of_gender(data, gender)
     
-    training_data, validation_test_data  = dtclean.split_data(data_by_gender, split_value)
+    training_data, validation_test_data  = dtclean.split_data(data_by_gender, split_value1)
+    validation_data, test_data  = dtclean.split_data(validation_test_data, split_value2)
     year_range_train = training_data['Year'].unique()
-    year_range_val = validation_test_data['Year'].unique()
+    year_range_val = validation_data['Year'].unique()
 
 
     leecarter = LeeCarter(gender)
@@ -135,7 +138,7 @@ if __name__ == '__main__':
     prediction = leecarter.predict(num_time_steps = len(year_range_val), return_only_prediction = True)
     pred_mx = prediction['mx']
     LC_new_kt = prediction['kt_forecast']
-    validation_test_kt = leecarter.map_mx_to_kt(data = validation_test_data)
+    validation_test_kt = leecarter.map_mx_to_kt(data = validation_data)
     train_prediction = leecarter.predict(num_time_steps = 0, return_only_prediction = False)
     train_pred_mx = train_prediction['mx']
 
@@ -143,7 +146,7 @@ if __name__ == '__main__':
 
     # Evaluation 
     mse_train = mean_squared_error(training_data['mx'], train_pred_mx )*10**4
-    mse_val = mean_squared_error(validation_test_data['mx'], pred_mx )*10**4
+    mse_val = mean_squared_error(validation_data['mx'], pred_mx )*10**4
     print(f'RMSE during training ({gender}) {round(mse_train, 4)}')
     print(f'RMSE during testing ({gender}) {round(mse_val, 4)}')
     from datetime import datetime

@@ -118,6 +118,7 @@ def train_gru(parameters : dict,
     recursive_prediction_loss_male, recursive_prediction_loss_female = rf.loss_recursive_forecasting(validation_data, recursive_prediction, gender_model = gender)
 
     if gender == 'both':
+        print(f'Male: {recursive_prediction_loss_male}, Female: {recursive_prediction_loss_female}')
         return (recursive_prediction_loss_male + recursive_prediction_loss_female)/2
     
     elif gender == 'Male':
@@ -152,8 +153,8 @@ def train_rnn(parameters : dict,
     split_value2 = split_value2 # 2006 a 2022 corresponde a 17 anos (17/83 approx. 20%)
     gender = gender
     both_gender_model = (gender == 'both')
-    checkpoint_dir = f'Saved_models/checkpoint_{gender}.pt'
-    best_model_dir = f'Saved_models/best_model_{gender}.pt'
+    checkpoint_dir = f'Saved_models/checkpoint_lstm_{gender}.h5'
+    best_model_dir = f'Saved_models/best_model_lstm_{gender}.h5'
 
 
     # Model hyperparameters  
@@ -192,6 +193,7 @@ def train_rnn(parameters : dict,
     recursive_prediction_loss_male, recursive_prediction_loss_female = rf.loss_recursive_forecasting(validation_data, recursive_prediction, gender_model = gender)
 
     if gender == 'both':
+        print(f'Male: {recursive_prediction_loss_male}, Female: {recursive_prediction_loss_female}')
         return (recursive_prediction_loss_male + recursive_prediction_loss_female)/2
     
     elif gender == 'Male':
@@ -234,8 +236,8 @@ def train_transformer(parameters : dict,
     split_value2 = split_value2 # 2006 a 2022 corresponde a 17 anos (17/83 approx. 20%)
     gender = gender
     both_gender_model = (gender == 'both')
-    checkpoint_dir = f'Saved_models/checkpoint_{gender}.pt'
-    best_model_dir = f'Saved_models/best_model_{gender}.pt'
+    checkpoint_dir = f'Saved_models/checkpoint_lstm_{gender}.h5'
+    best_model_dir = f'Saved_models/best_model_lstm_{gender}.h5'
 
 
     # Model hyperparameters  
@@ -365,6 +367,7 @@ def train_transformer(parameters : dict,
     print('=' * 100)
 
     if gender == 'both':
+        print(f'Male: {recursive_prediction_loss_male}, Female: {recursive_prediction_loss_female}')
         return (recursive_prediction_loss_male + recursive_prediction_loss_female)/2
     
     elif gender == 'Male':
