@@ -49,8 +49,8 @@ if __name__ == "__main__":
     }
 
     train_rnn(parameters_lstm, 
-                      split_value1 = 1993, 
-                      split_value2 = 2006,
+                      split_value1 = 2006, 
+                      split_value2 = 2022,
                       gender = 'both',
                       raw_filename = 'Dataset/Mx_1x1_alt.txt',
                       country = "PT", 

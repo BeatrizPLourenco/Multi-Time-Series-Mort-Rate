@@ -116,6 +116,7 @@ def train_gru(parameters : dict,
     first_year, last_year = split_value1, split_value2 -1
     recursive_prediction = rf.recursive_forecast(data, first_year,last_year, T, tau0, xmin, xmax, model, batch_size=1, model_type = 'lstm', gender = gender)
     recursive_prediction_loss_male, recursive_prediction_loss_female = rf.loss_recursive_forecasting(validation_data, recursive_prediction, gender_model = gender)
+    model.save('your_lstm_model.h5')
 
     if gender == 'both':
         print(f'Male: {recursive_prediction_loss_male}, Female: {recursive_prediction_loss_female}')
@@ -191,6 +192,10 @@ def train_rnn(parameters : dict,
     first_year, last_year = split_value1, split_value2 -1
     recursive_prediction = rf.recursive_forecast(data, first_year,last_year, T, tau0, xmin, xmax, model, batch_size=1, model_type = 'lstm', gender = gender)
     recursive_prediction_loss_male, recursive_prediction_loss_female = rf.loss_recursive_forecasting(validation_data, recursive_prediction, gender_model = gender)
+    
+    model.save(f'lstm_model_{time.time()}.h5')
+
+
 
     if gender == 'both':
         print(f'Male: {recursive_prediction_loss_male}, Female: {recursive_prediction_loss_female}')
