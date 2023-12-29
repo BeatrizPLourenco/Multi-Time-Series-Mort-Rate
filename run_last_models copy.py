@@ -19,7 +19,7 @@ if __name__ == "__main__":
     split_value1 = 1993
     split_value2 = 2006
     raw_filename = 'Dataset/Mx_1x1_alt_1940_2022.txt'
-    raw_filename = 'Dataset/Mx_1x1_alt.txt'
+    #raw_filename = 'Dataset/Mx_1x1_alt.txt'
     gender = 'both'
     country = "PT"
 
@@ -59,9 +59,9 @@ if __name__ == "__main__":
     # Load the model
     model.load_weights(model_path)
 
-    first_year, last_year = split_value1, split_value2 -1
+    first_year, last_year = 2006, 2022 
     recursive_prediction = rf.recursive_forecast(data, first_year,last_year, T, tau0, xmin, xmax, model, batch_size=1, model_type = 'lstm', gender = gender)
-    recursive_prediction_loss_male, recursive_prediction_loss_female = rf.loss_recursive_forecasting(validation_data, recursive_prediction, gender_model = gender)
+    recursive_prediction_loss_male, recursive_prediction_loss_female = rf.loss_recursive_forecasting(testing_data, recursive_prediction, gender_model = gender)
 
 
     # Now, you can use the loaded_model for predictions or further training

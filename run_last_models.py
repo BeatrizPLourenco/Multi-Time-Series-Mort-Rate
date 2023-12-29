@@ -50,9 +50,10 @@ if __name__ == "__main__":
 
     train_rnn(parameters_lstm, 
                       split_value1 = 2006, 
-                      split_value2 = 2022,
+                      split_value2 = None,
+                      split_value2 = None,
                       gender = 'both',
-                      raw_filename = 'Dataset/Mx_1x1_alt.txt',
+                      raw_filename = raw_filename,
                       country = "PT", 
                       seed = 0)
     

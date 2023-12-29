@@ -86,6 +86,8 @@ def split_data(data: pd.DataFrame, split_value: int) -> tuple:
     Returns:
         tuple with two pandas Dataframe
     """
+    if split_data is None:
+        return data, None
 
     _1st_data = data[data['Year'] < split_value]
     _2nd_data = data[data['Year'] >= split_value]
