@@ -64,8 +64,6 @@ def train_rnn(parameters : dict,
     #split_value2 = split_value2 # 2006 a 2022 corresponde a 17 anos (17/83 approx. 20%)
     gender = gender
     both_gender_model = (gender == 'both')
-    checkpoint_dir = f'Saved_models/checkpoint_lstm_{gender}.h5'
-    best_model_dir = f'Saved_models/best_model_lstm_{gender}.h5'
 
 
     # Model hyperparameters  

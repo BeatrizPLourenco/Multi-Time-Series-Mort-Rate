@@ -111,9 +111,11 @@ def viz_kt_graph(kt: np.array, kt_forecasts: dict, x_axis_train_values: np.array
             c, name = id
             plt.scatter(x = x_axis_val_values, y = kt_forecast, c = c, label = name)
 
-        
+        plt.legend(loc='upper right', fontsize=18, frameon=True)
+
         if path_to_save_fig is not None:
             plt.savefig(path_to_save_fig)
+        
         plt.show()
 
     
@@ -153,7 +155,7 @@ if __name__ == '__main__':
 
     viz_kt_graph(kt = leecarter.kt, kt_forecasts = kt_forecasts, x_axis_train_values = year_range_train, x_axis_val_values = year_range_val, path_to_save_fig = f'leecarter_{gender}_{country}_' + str(datetime.now()) + '.pdf')
     
-    
+
     print('end!')
 
 
