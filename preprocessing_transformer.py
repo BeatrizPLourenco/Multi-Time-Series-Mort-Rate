@@ -160,30 +160,6 @@ def preprocessing_with_both_gendersLSTM(data, T, tau0,xmin, xmax):
 
 
 
-def get_preprocessed_patterns(model_type:str, gender:str):
-    genders = {'Male', 'Female', 'both'}
-    assert gender in genders
-
-    models = {'Tranformer', 'lstm', 'gru'}
-    assert model_type in model_type
-
-    if model_type in {'Male', 'Female'}:
-        if model_type in {'Male', 'Female'}:
-            return (preprocessed_dataLSTM(data, 'Female', T, tau0,xmin, xmax))
-        
-        if model_type in {'both'}:
-            return (preprocessed_dataLSTM(data, 'Female', T, tau0,xmin, xmax))
-    
-    if model_type in {'Male', 'Female'}:
-        if model_type in {'Male', 'Female'}:
-            return (preprocessed_dataLSTM(data, 'Female', T, tau0,xmin, xmax))
-        
-        if model_type in {'both'}:
-            return (preprocessed_dataLSTM(data, 'Female', T, tau0,xmin, xmax))
-  
-
-
-
 def preprocessed_dataLSTM( data: Tensor, gender, T , tau0, xmin, xmax):
     logmat = data_to_logmat(data, gender)
     padd_train= padding(logmat, T, tau0)

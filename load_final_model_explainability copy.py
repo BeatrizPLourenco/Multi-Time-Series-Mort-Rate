@@ -14,8 +14,8 @@ import train_transformer as trt
 import mortalityRateTransformer as mrt
 import recursive_forecast as rf
 import explainability_lstm as exai
-import shap
-
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
 
 if __name__ == "__main__":
     split_value1 = 1993
@@ -47,11 +47,13 @@ if __name__ == "__main__":
 
     training_data, validation_test_data  = dtclean.split_data(data, split_value1)
     validation_data, testing_data  = dtclean.split_data(validation_test_data, split_value2) 
+    sample = validation_test_data[validation_test_data['Year']>=1998] # 1998+8 = 2006
 
     if gender == 'both':
         train_data = prt.preprocessing_with_both_gendersLSTM(training_data, T, tau0,xmin, xmax)
         val_data  = prt.preprocessing_with_both_gendersLSTM(validation_data, T, tau0,xmin, xmax)
         test_data = prt.preprocessing_with_both_gendersLSTM(testing_data, T, tau0,xmin, xmax)
+        sample_input = prt.preprocessing_with_both_gendersLSTM(validation_test_data, T, tau0,xmin, xmax) #1993+8 =2001
 
     # Replace 'your_model.h5' with the path to your saved model file
     model_path = 'lstm_model_1703860261.18526.h5'
@@ -63,43 +65,66 @@ if __name__ == "__main__":
     model.load_weights(model_path)
 
     # Now, you can use the loaded_model for predictions or further training
-    yearmin, yearmax = 2006, 2022
-    beg_year, middle_age = 2010, 13
+    explain_method = 'IntegratedGradients'
+    train_data_exp = train_data[:2]
+    test_data_exp = test_data[:2]
+    val_data_exp = val_data[:2]
+    #val_test_data_exp = val_test_data[:2]
+    sample_input_exp = sample_input[:2]
+    yearmax, yearmin = 2022, 2006
+    beg_year, middle_age = 2006, 0
     gender = 'Male'
     gender_idx = 1 if gender == 'Male' else 0
     instance_idx = ((beg_year - yearmin)*99 + middle_age ) * 2 + gender_idx
-    
-    feature_size = 5*10
-    train_data_exp = train_data[:2]
-    test_data_exp = test_data[:2]
+    instance = [np.squeeze(x) for x in exai.get_instance(sample_input_exp, instance_idx)]
 
-    instance = exai.get_instance(test_data_exp, instance_idx)
-    reshaped_instance_with_gender = exai.flat_input(instance)
-    reshaped_train_with_gender = exai.flat_input(train_data_exp)
-    reshaped_test_with_gender = exai.flat_input(test_data_exp)
+    #instance = exai.get_instance(test_data_exp, instance_idx)
+    baseline = [np.zeros_like(input_data) for input_data in instance]
 
-    modelwrapped = exai.ModelWrapper(model)
+    ig = exai.integrated_gradients(model, baseline_inputs = baseline, inputs = instance)
 
-    explainer = shap.KernelExplainer(modelwrapped.forward, shap.sample(reshaped_train_with_gender, 10))
-
-    shap_values = explainer.shap_values(reshaped_instance_with_gender)
-
-    filepath = f'shap_bar_plot_{beg_year}_{middle_age}_{gender}.pdf'
-    """exai.shap_barplot(shap_values, 
-                      reshaped_instance_with_gender, 
-                      filepath = filepath, 
-                      feature_names = exai.feature_names(beg_year, middle_age,gender))"""
-
-
-    shap.force_plot(explainer.expected_value, 
-                    shap_values, 
-                    reshaped_test_with_gender, 
-                    matplotlib=True, 
-                    feature_names = exai.feature_names(beg_year, middle_age,gender), show = False)
-
+    ig_mx, ig_gender = ig
+    igmat = np.abs(np.transpose(ig_mx))
+    filepath = f'{explain_method}_heatmap_plot_{beg_year}_{middle_age}_{gender}.pdf'
+    """exai.explain_scores_heatmap(igmat, 
+                                beg_year, 
+                                middle_age,
+                                vmin=0,vmax=np.max(igmat), explain_method ='IntegratedGradients', 
+                                cmap = 'hot',
+                                filepath = filepath)"""
     
 
-    
+    gender_scores = []
+    selected_year = '2006_2022'
+    igmat_sum = np.zeros_like(igmat)
+    for gender_idx in [0,1]:
+        scores = []
+        for age in range(0, 99+1):
+            ig_mx_per_year = []
+            ig_gender_per_year =[]
+            for year in range(yearmin, yearmax+1):
+                instance_idx = ((year - yearmin)*99 + age ) * 2 + gender_idx
+                print(year, age, instance_idx)
+                instance = [np.squeeze(x) for x in exai.get_instance(sample_input_exp, instance_idx)]
+                ig_mx, ig_gender = exai.integrated_gradients(model, baseline_inputs = baseline, inputs = instance)
+                igmat_per_year_age_gender = np.abs(np.transpose(ig_mx))
+                igmat_sum = igmat_sum + igmat_per_year_age_gender
+                ig_gender_per_year.append(float(ig_gender))
+            scores.append(np.array(ig_gender_per_year).mean())
+        gender_scores.append(scores)
+
+    #exai.explain_scores_per_age_plot(gender_scores, gender='both', year = selected_year, explain_method = 'Scores' )
+    scaler = MinMaxScaler()
+    igmat_norm = scaler.fit_transform(igmat)
+    filepath = f'{explain_method}_heatmap_plot_{selected_year}.pdf'
+    exai.explain_scores_heatmap(igmat_norm, 
+                                xticklabels = ['T - 8', 'T - 7', 'T - 6', 'T - 5', 'T - 4', 'T - 3', 'T - 2', 'T - 1'],
+                                yticklabels = ['Age - 2', 'Age - 1', 'Age','Age + 1', 'Age + 2'],
+                                vmin = 0,vmax = np.max(igmat_norm), explain_method = 'IntegratedGradients', 
+                                cmap = 'hot',
+                                filepath = filepath, year=selected_year)
+    print('end!')
+        
 
 
 
